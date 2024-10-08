@@ -1,0 +1,14 @@
+# Terraform
+.terraform
+*.auto.tfvars
+terraform.tfstate
+terraform.tfstate.backup
+modules/
+
+# Packer
+.packer
+*-vars.pkr.hcl
+packer.json
+packer.d.ts
+packer_cache/
+**/user-data

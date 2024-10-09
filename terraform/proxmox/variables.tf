@@ -13,3 +13,8 @@ variable "proxmox_api_token_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "proxmox_node" {
+  description = "Proxmox Node Name"
+  type        = string
+}

@@ -1,0 +1,5 @@
+vault_address = "http://vault.domain.local:8200"
+vault_token   = "hvs.xxxxxxxxxxxxxxxxxxxxx"
+
+admin_username = "foo"
+admin_password = "bar"

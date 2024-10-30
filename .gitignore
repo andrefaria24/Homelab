@@ -12,3 +12,7 @@ packer.json
 packer.d.ts
 packer_cache/
 **/user-data
+
+# Ansible
+ansible.cfg
+hosts

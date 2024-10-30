@@ -17,7 +17,7 @@
 
     - name: Copy file with owner and permissions
       ansible.builtin.copy:
-        src: ./docker/portainer-agent-stack.yml
+        src: ../docker/portainer-agent-stack.yml
         dest: /etc/docker/portainer-agent-stack.yml
         mode: '0755'
 

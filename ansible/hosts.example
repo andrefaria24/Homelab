@@ -1,0 +1,16 @@
+[docker]
+docker-mgr-1.domain.local
+docker-wrk-1.domain.local
+docker-wrk-2.domain.local
+docker-wrk-3.domain.local
+
+[docker_mgr_nodes]
+docker-mgr-1.domain.local
+
+[docker_wrk_nodes]
+docker-wrk-1.domain.local
+docker-wrk-2.domain.local
+docker-wrk-3.domain.local
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

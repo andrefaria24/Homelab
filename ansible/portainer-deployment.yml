@@ -1,0 +1,29 @@
+---
+- name: Deploy Portainer Agent containers
+  hosts: docker_mgr_nodes
+  become: true
+
+  tasks:
+    - name: Install required packages
+      ansible.builtin.apt:
+        pkg:
+          - python3-jsondiff
+
+    - name: Create directory for compose file
+      ansible.builtin.file:
+        path: /etc/docker/
+        state: directory
+        mode: '0755'
+
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: ./docker/portainer-agent-stack.yml
+        dest: /etc/docker/portainer-agent-stack.yml
+        mode: '0755'
+
+    - name: Deploy stack from a compose file
+      docker_stack:
+        state: present
+        name: portainer
+        compose:
+          - /etc/docker/portainer-agent-stack.yml

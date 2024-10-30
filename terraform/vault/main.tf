@@ -1,4 +1,4 @@
-# Create userpass auth
+# Enable Userpass authentication
 resource "vault_auth_backend" "userpass" {
   type = "userpass"
 
@@ -26,4 +26,19 @@ resource "vault_generic_endpoint" "admin" {
   "password": "${var.admin_password}"
 }
 EOT
+}
+
+# Enable PKI secret engine
+resource "vault_mount" "pki" {
+  path        = "pki"
+  type        = "pki"
+
+  default_lease_ttl_seconds = 0
+  max_lease_ttl_seconds     = 315360000
+}
+
+# Enable transit secret engine
+resource "vault_mount" "transit" {
+  path        = "transit"
+  type        = "transit"
 }

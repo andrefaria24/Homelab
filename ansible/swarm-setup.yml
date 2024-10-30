@@ -1,0 +1,68 @@
+---
+- name: Initialize Docker Swarm on first manager
+  hosts: docker_mgr_nodes[0]
+  become: true
+
+  tasks:
+    - name: Check Docker Swarm status
+      ansible.builtin.shell: docker info --format '{{ "{{.Swarm.LocalNodeState}}" }}'
+      register: docker_swarm_status
+      changed_when: false
+
+    - name: Initialize Docker Swarm  # Initializes the Swarm if not already active
+      ansible.builtin.shell:
+        cmd: docker swarm init --advertise-addr {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
+      when: "'inactive' in docker_swarm_status.stdout"
+      register: swarm_init
+      changed_when: "'Swarm initialized' in swarm_init.stdout"
+
+    - name: Retrieve Docker Swarm manager token
+      ansible.builtin.shell: docker swarm join-token manager -q
+      register: manager_token
+      changed_when: false
+
+    - name: Retrieve Docker Swarm worker token
+      ansible.builtin.shell: docker swarm join-token worker -q
+      register: worker_token
+      changed_when: false
+
+- name: Join remaining managers to Docker Swarm
+  hosts: docker_mgr_nodes:!docker_mgr_nodes[0]
+  become: true
+  tasks:
+    - name: Check Docker Swarm status before attempting to join
+      ansible.builtin.shell: docker info --format '{{ "{{.Swarm.LocalNodeState}}" }}'
+      register: docker_swarm_status
+      changed_when: false
+
+    - name: Join Swarm as manager
+      ansible.builtin.shell:
+        cmd: docker swarm join --token {{ hostvars[groups['docker_mgr_nodes'][0]]['manager_token'].stdout }} {{ hostvars[groups['docker_mgr_nodes'][0]]['ansible_default_ipv4']['address'] }}:2377
+      when: hostvars[groups['docker_mgr_nodes'][0]]['manager_token'].stdout is defined and docker_swarm_status.stdout != "active"
+      register: swarm_join
+      changed_when: "'This node joined a swarm as a manager' in swarm_join.stdout"
+
+    - name: Label Docker Swarm manager nodes
+      ansible.builtin.shell:
+        cmd: docker node update --label-add manager=true {{ item }}
+      loop: "{{ groups['docker_mgr_nodes'] }}"
+      loop_control:
+        loop_var: item
+      when: swarm_join is changed
+      changed_when: false
+
+- name: Join workers to Docker Swarm
+  hosts: docker_wrk_nodes
+  become: true
+  tasks:
+    - name: Check if node is part of a swarm
+      ansible.builtin.shell: docker info --format '{{ "{{.Swarm.LocalNodeState}}" }}'
+      register: swarm_state
+      changed_when: false
+
+    - name: Join Swarm as worker if not already part of a swarm
+      ansible.builtin.shell:
+        cmd: docker swarm join --token {{ hostvars[groups['docker_mgr_nodes'][0]]['worker_token'].stdout }} {{ hostvars[groups['docker_mgr_nodes'][0]]['ansible_default_ipv4']['address'] }}:2377
+      when: swarm_state.stdout != 'active'
+      register: swarm_join
+      changed_when: "'This node joined a swarm as a worker' in swarm_join.stdout"

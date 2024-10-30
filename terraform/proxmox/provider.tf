@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.9.7"
+  required_version = ">= 1.9.8"
 
   required_providers {
     proxmox = {
@@ -14,6 +14,6 @@ provider "proxmox" {
   pm_api_token_id     = var.proxmox_api_token_id
   pm_api_token_secret = var.proxmox_api_token_secret
 
-  pm_tls_insecure = true
+  pm_tls_insecure = false
   pm_timeout      = 900
 }

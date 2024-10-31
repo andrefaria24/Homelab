@@ -1,0 +1,28 @@
+---
+- name: Update all Linux systems
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Detect Operating System
+      set_fact:
+        os_family: "{{ ansible_os_family }}"
+
+    - name: Update Debian/Ubuntu
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+      when: os_family == "Debian" or os_family == "Ubuntu"
+
+    - name: Update RHEL/CentOS
+      yum:
+        name: "*"
+        state: latest
+      when: os_family == "RedHat" or os_family == "CentOS"
+
+    - name: Update Fedora
+      dnf:
+        name: "*"
+        state: latest
+      when: os_family == "Fedora"

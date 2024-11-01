@@ -28,6 +28,18 @@ resource "vault_generic_endpoint" "admin" {
 EOT
 }
 
+# Enable AppRole authentication
+resource "vault_auth_backend" "approle" {
+  type = "approle"
+}
+
+# Create AppRole homelab backend role
+resource "vault_approle_auth_backend_role" "homelab" {
+  backend        = vault_auth_backend.approle.path
+  role_name      = "homelab-servers-role"
+  token_policies = ["pki_access"]
+}
+
 # Enable PKI secret engine
 resource "vault_mount" "pki" {
   path        = "pki"

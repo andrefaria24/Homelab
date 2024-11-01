@@ -1,5 +1,13 @@
-vault_address = "http://vault.domain.local:8200"
+vault_address = "https://vault.domain.local:8200"
 vault_token   = "hvs.xxxxxxxxxxxxxxxxxxxxx"
 
 admin_username = "foo"
 admin_password = "bar"
+
+pki_allowed_domains = ["domain.local"]
+
+cert_country = ["United States of America"]
+cert_province = ["New York"]
+cert_locality = ["New York"]
+cert_street_address = ["123 Main St."]
+cert_postal_code = ["01234"]

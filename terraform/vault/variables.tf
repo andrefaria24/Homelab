@@ -19,3 +19,33 @@ variable "admin_password" {
   type        = string
   sensitive = true
 }
+
+variable "pki_allowed_domains" {
+  description = "List of allowed domains for certificates"
+  type        = list(string)
+}
+
+variable "cert_country" {
+  description = "The country of generated certificates"
+  type        = list(string)
+}
+
+variable "cert_province" {
+  description = "The province/state of generated certificates"
+  type        = list(string)
+}
+
+variable "cert_locality" {
+  description = "The locality/city of generated certificates"
+  type        = list(string)
+}
+
+variable "cert_street_address" {
+  description = "The street address of generated certificates"
+  type        = list(string)
+}
+
+variable "cert_postal_code" {
+  description = "The postal code of generated certificates"
+  type        = list(string)
+}

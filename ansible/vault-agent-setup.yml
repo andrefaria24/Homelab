@@ -11,24 +11,41 @@
       set_fact:
         architecture: "{{ ansible_facts['architecture'] }}"
 
-    # - name: Create directory for Vault binary
-    #   ansible.builtin.file:
-    #     path: /etc/vault/
-    #     state: directory
-    #     mode: '0755'
-
     - name: Download Vault archive (ARM64)
       ansible.builtin.unarchive:
-        src: 'https://releases.hashicorp.com/vault/1.18.0/vault_1.18.0_linux_arm64.zip'
+        src: 'https://releases.hashicorp.com/vault/1.18.1/vault_1.18.1_linux_arm64.zip'
         dest: /bin/
         remote_src: yes
       when: architecture == "aarch64"
 
     - name: Download Vault archive (AMD64)
       ansible.builtin.unarchive:
-        src: https://releases.hashicorp.com/vault/1.18.0/vault_1.18.0_linux_amd64.zip
+        src: 'https://releases.hashicorp.com/vault/1.18.1/vault_1.18.1_linux_amd64.zip'
         dest: /bin/
         remote_src: yes
       when: architecture == "amd64"
 
+    - name: Create Vault config directory
+      ansible.builtin.file:
+        path: /etc/vault/
+        state: directory
+        mode: '0755'
     
+    - name: Copy Vault Agent config file (backup original if already in place)
+      ansible.builtin.copy:
+        src: ./files/vault-agent-config.hcl
+        dest: /etc/vault/agent-config.hcl
+        owner: root
+        group: root
+        mode: '0644'
+        backup: yes
+
+    - name: Start Vault Agent
+      command: vault agent -config=/etc/vault/agent-config.hcl
+      args:
+        chdir: /etc/vault
+      register: agent_start_result
+
+    - name: Check Vault Agent start status
+      debug:
+        msg: "Vault Agent start status: {{ agent_start_result.stdout }}"

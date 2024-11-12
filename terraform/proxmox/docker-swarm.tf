@@ -45,7 +45,7 @@ resource "proxmox_vm_qemu" "docker-managers" {
 
   network {
     bridge = "vmbr0"
-    model  = "virtio"
+    model  = "e1000"
   }
 
   # ipconfig0 = "ip=0.0.0.0/0,gw=0.0.0.0"
@@ -105,7 +105,7 @@ resource "proxmox_vm_qemu" "docker-workers" {
 
   network {
     bridge = "vmbr0"
-    model  = "virtio"
+    model  = "e1000"
   }
 
   # ipconfig0 = "ip=0.0.0.0/0,gw=0.0.0.0"

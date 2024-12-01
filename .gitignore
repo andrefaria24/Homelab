@@ -5,6 +5,10 @@ terraform.tfstate
 terraform.tfstate.backup
 modules/
 
+# Ansible
+ansible.cfg
+hosts
+
 # Packer
 .packer
 *-vars.pkr.hcl
@@ -13,11 +17,7 @@ packer.d.ts
 packer_cache/
 **/user-data
 
-# Ansible
-ansible.cfg
-hosts
-
-#Misc
+# Packer - Windows Server 2022
 *.exe
 unattend.pkrtpl
 **/iostor/*

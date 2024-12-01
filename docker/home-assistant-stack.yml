@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  homeassistant:
+    image: "ghcr.io/home-assistant/home-assistant:2024.11.3"
+    volumes:
+      - homeassistant_config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    networks:
+      - homeassistant_network
+    ports:
+      - "8123:8123"
+
+networks:
+  homeassistant_network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  homeassistant_config:

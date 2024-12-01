@@ -3,7 +3,8 @@ proxmox_api_token_id = "foo@pve!bar"
 proxmox_api_token_secret = "00000000-0000-0000-0000-000000000000"
 proxmox_node = "your-proxmox-node"
 
-ubuntu_iso_file = "local:iso/your-iso-image.iso" # Location of iso within Proxmox
+ubuntu_iso_file = "local:iso/your-ubuntu-iso-image.iso" # Location of iso within Proxmox
+win2022_iso_file = "local:iso/your-win-iso-image.iso"
 
 packer_http_bind_address = "0.0.0.0"
 

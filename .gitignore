@@ -16,3 +16,9 @@ packer_cache/
 # Ansible
 ansible.cfg
 hosts
+
+#Misc
+*.exe
+unattend.pkrtpl
+**/iostor/*
+**/netkvm/*

@@ -3,7 +3,6 @@
 *.auto.tfvars
 terraform.tfstate
 terraform.tfstate.backup
-modules/
 
 # Ansible
 ansible.cfg

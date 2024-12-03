@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:2.488
+    ports:
+      - "8081:8080"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+    network_mode: bridge
+    environment:
+      VIRTUAL_HOST: "jenkins.local.andrecfaria.com"
+  ssh-agent:
+    image: jenkins/ssh-agent:6.4.0
+    network_mode: bridge
+
+volumes:
+  jenkins_data:

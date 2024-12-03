@@ -11,6 +11,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       VIRTUAL_HOST: "portainer.local.andrecfaria.com"
+      VIRTUAL_PORT: "9000"
     network_mode: bridge
 
 volumes:

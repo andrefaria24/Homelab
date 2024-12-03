@@ -1,0 +1,10 @@
+FROM nginx:1.27.3
+
+LABEL Author="Andre Faria"
+LABEL Email="andre.faria.24@gmail.com"
+LABEL GitHub="https://github.com/andrefaria24"
+LABEL BaseImage="nginx:1.27.3"
+
+COPY index.html /usr/share/nginx/html/
+
+EXPOSE 80

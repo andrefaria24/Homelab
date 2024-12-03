@@ -2,11 +2,9 @@ version: '3.8'
 
 services:
   nginx-proxy:
-    image: nginx:1.27.3
+    image: faria135/helloworld:1.0.0
     ports:
       - "8080:80"
     network_mode: bridge
-    volumes:
-      - ./index.html:/usr/share/nginx/html/index.html
     environment:
       VIRTUAL_HOST: "helloworld.local.andrecfaria.com"

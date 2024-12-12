@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v3.0.1
+    restart: unless-stopped
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+      - prometheus_data:/prometheus
+    ports:
+      - 9090:9090
+    environment:
+      VIRTUAL_HOST: "prometheus.local.andrecfaria.com"
+      VIRTUAL_PORT: "9090"
+    network_mode: bridge
+  node-exporter:
+    container_name: node-exporter
+    image: prom/node-exporter:v1.8.2
+    restart: unless-stopped
+    ports:
+      - 9100:9100
+    environment:
+      VIRTUAL_HOST: "node-exporter.local.andrecfaria.com"
+      VIRTUAL_PORT: "9100"
+    network_mode: bridge
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:11.4.0
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      VIRTUAL_HOST: "grafana.local.andrecfaria.com"
+      VIRTUAL_PORT: "3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    network_mode: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:

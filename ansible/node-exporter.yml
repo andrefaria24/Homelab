@@ -3,17 +3,42 @@
   become: true
   vars:
       node_exporter_version: 1.8.2
+
   tasks:
-    - name: download node exporter binary
+    - name: Gather facts
+      ansible.builtin.gather_facts:
+
+    - name: Determine OS architecture
+      set_fact:
+        architecture: "{{ ansible_facts['architecture'] }}"
+
+    - name: download node exporter binary (AMD64)
       get_url:
         url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
         dest: /tmp
-    - name: unarchive node exporter
+      when: architecture == "amd64"
+
+    - name: download node exporter binary (ARM64)
+      get_url:
+        url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-arm64.tar.gz
+        dest: /tmp
+      when: architecture == "aarch64"
+
+    - name: unarchive node exporter (AMD64)
       unarchive:
         remote_src: yes
         src: /tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
         dest: /tmp
-    - name: move node exporter to /usr/local/bin
+      when: architecture == "amd64"
+
+    - name: unarchive node exporter (ARM64)
+      unarchive:
+        remote_src: yes
+        src: /tmp/node_exporter-{{ node_exporter_version }}.linux-arm64.tar.gz
+        dest: /tmp
+      when: architecture == "aarch64"
+
+    - name: move node exporter to /usr/local/bin (AMD64)
       copy:
         src: /tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter
         dest: /usr/local/bin/node_exporter
@@ -21,6 +46,18 @@
         owner: root
         group: root
         mode: 0755
+      when: architecture == "amd64"
+
+    - name: move node exporter to /usr/local/bin (ARM64)
+      copy:
+        src: /tmp/node_exporter-{{ node_exporter_version }}.linux-arm64/node_exporter
+        dest: /usr/local/bin/node_exporter
+        remote_src: yes
+        owner: root
+        group: root
+        mode: 0755
+      when: architecture == "aarch64"
+
     - name: install unit file to systemd
       template:
         src: files/node-exporter.service.j2
@@ -28,6 +65,7 @@
         owner: root
         group: root
         mode: 0600
+
     - name: configure systemd to use service
       systemd:
         daemon_reload: yes

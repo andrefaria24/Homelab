@@ -10,7 +10,7 @@ hosts
 
 # Packer
 .packer
-*-vars.pkr.hcl
+*vars.pkr.hcl
 packer.json
 packer.d.ts
 packer_cache/

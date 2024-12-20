@@ -3,7 +3,7 @@
 packer {
   required_plugins {
     proxmox = {
-      version = "=1.2.1"
+      version = "=1.2.2"
       source  = "github.com/hashicorp/proxmox"
     }
   }
@@ -48,11 +48,10 @@ variable "ssh_password" {
 source "proxmox-iso" "ubuntu-server-template" {
 
   # Proxmox Connection Settings
-  proxmox_url = "${var.proxmox_api_url}"
-  username    = "${var.proxmox_api_token_id}"
-  token       = "${var.proxmox_api_token_secret}"
-  # Skip TLS Verification
-  insecure_skip_tls_verify = true
+  proxmox_url              = "${var.proxmox_api_url}"
+  username                 = "${var.proxmox_api_token_id}"
+  token                    = "${var.proxmox_api_token_secret}"
+  insecure_skip_tls_verify = true # Skip TLS Verification
 
   # VM General Settings
   node                 = "${var.proxmox_node}"
@@ -101,7 +100,7 @@ source "proxmox-iso" "ubuntu-server-template" {
   boot_wait    = "10s"
   communicator = "ssh"
 
-  # PACKER Autoinstall Settings
+  # Packer Autoinstall Settings
   http_directory    = "http"
   http_bind_address = "${var.packer_http_bind_address}"
   http_port_min     = 8802
@@ -142,14 +141,11 @@ build {
   }
 
   provisioner "file" {
-    source      = "files/99-pve.cfg"
+    source      = "./files/99-pve.cfg"
     destination = "/tmp/99-pve.cfg"
   }
 
   provisioner "shell" {
     inline = ["sudo cp /tmp/99-pve.cfg /etc/cloud/cloud.cfg.d/99-pve.cfg"]
   }
-
-  # Additional provisioning scripts
-  # ...
 }

@@ -10,3 +10,12 @@ packer_http_bind_address = "0.0.0.0"
 
 ssh_username = "your-username"
 ssh_password = "your-password"
+
+winrm_user = "your-username"
+winrm_password = "your-password"
+winrm_host = "0.0.0.0"
+
+image_index = {
+  "core" = 1
+  "desktop" = 2
+}

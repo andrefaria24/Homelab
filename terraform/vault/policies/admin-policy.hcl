@@ -4,8 +4,6 @@ path "sys/health"
   capabilities = ["read", "sudo"]
 }
 
-# Create and manage ACL policies broadly across Vault
-
 # List existing policies
 path "sys/policies/acl"
 {
@@ -17,8 +15,6 @@ path "sys/policies/acl/*"
 {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
-
-# Enable and manage authentication methods broadly across Vault
 
 # Manage auth methods broadly across Vault
 path "auth/*"
@@ -38,8 +34,6 @@ path "sys/auth"
   capabilities = ["read"]
 }
 
-# Enable and manage the key/value secrets engine at `secret/` path
-
 # List, create, update, and delete key/value secrets
 path "secret/*"
 {
@@ -55,5 +49,10 @@ path "sys/mounts/*"
 # List existing secrets engines.
 path "sys/mounts"
 {
-  capabilities = ["read"]
+  capabilities = ["read", "list"]
+}
+
+# Work with pki secrets engine
+path "pki*" {
+  capabilities = [ "create", "read", "update", "delete", "list", "sudo", "patch" ]
 }

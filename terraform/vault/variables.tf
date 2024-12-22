@@ -17,35 +17,30 @@ variable "admin_username" {
 variable "admin_password" {
   description = "Administrator password for Userpass auth"
   type        = string
-  sensitive = true
+  sensitive   = true
 }
 
-variable "pki_allowed_domains" {
-  description = "List of allowed domains for certificates"
+variable "cn_root" {
+  description = "CN of root certificate"
+  type        = string
+}
+
+variable "cn_intermediate" {
+  description = "CN of intermediate certificate"
+  type        = string
+}
+
+variable "issuer_name" {
+  description = "Certificate issuer name"
+  type        = string
+}
+
+variable "allowed_domains" {
+  description = "Allowed domains for PKI role"
   type        = list(string)
 }
 
-variable "cert_country" {
-  description = "The country of generated certificates"
-  type        = list(string)
-}
-
-variable "cert_province" {
-  description = "The province/state of generated certificates"
-  type        = list(string)
-}
-
-variable "cert_locality" {
-  description = "The locality/city of generated certificates"
-  type        = list(string)
-}
-
-variable "cert_street_address" {
-  description = "The street address of generated certificates"
-  type        = list(string)
-}
-
-variable "cert_postal_code" {
-  description = "The postal code of generated certificates"
-  type        = list(string)
+variable "cn_intermediate_role_name" {
+  description = "CN intermediate role name"
+  type        = string
 }

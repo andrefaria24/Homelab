@@ -1,5 +1,6 @@
 ui = true
 api_addr = "http://vault.local.andrecfaria.com:8200"
+cluster_name = "faria-vault"
 disable_mlock = "true"
 
 storage "file" {

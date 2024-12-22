@@ -4,10 +4,9 @@ vault_token   = "hvs.xxxxxxxxxxxxxxxxxxxxx"
 admin_username = "foo"
 admin_password = "bar"
 
-pki_allowed_domains = ["domain.local"]
+cn_root     = "domain.local"
+cn_intermediate = "local.domain.local"
+issuer_name = "domain.local-root"
+allowed_domains = ["domain.local"]
 
-cert_country = ["United States of America"]
-cert_province = ["New York"]
-cert_locality = ["New York"]
-cert_street_address = ["123 Main St."]
-cert_postal_code = ["01234"]
+cn_intermediate_role_name = "local-dot-domain-dot-local"

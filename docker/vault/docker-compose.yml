@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  vault:
+    image: hashicorp/vault:1.18.3
+    container_name: vault
+    environment:
+      VAULT_ADDR: "http://vault.local.andrecfaria.com:8200"
+      VIRTUAL_HOST: "vault.local.andrecfaria.com"
+      VIRTUAL_PORT: "8200"
+    ports:
+      - "8200:8200"
+    restart: unless-stopped
+    volumes:
+      - vault_logs:/vault/logs/:rw
+      - vault_data:/vault/data/:rw
+      - vault_file:/vault/file/:rw
+      - "./vault-config.hcl:/vault/config/config.hcl:rw"
+    cap_add:
+      - IPC_LOCK
+    entrypoint: vault server -config /vault/config/config.hcl
+    network_mode: bridge
+
+volumes:
+  vault_logs:
+  vault_data:
+  vault_file:

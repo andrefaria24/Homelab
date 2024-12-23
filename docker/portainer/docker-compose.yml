@@ -3,15 +3,21 @@ version: '3.8'
 services:
   portainer:
     image: portainer/portainer-ce:2.24.0
+    container_name: portainer
     restart: always
     ports:
-      - "9000:9000"
+      - "9443:9443"
     volumes:
       - portainer_data:/data
       - /var/run/docker.sock:/var/run/docker.sock
+      - "./certs:/certs"
+    command:
+      --sslcert /certs/portainer.crt
+      --sslkey /certs/portainer.key
     environment:
       VIRTUAL_HOST: "portainer.local.andrecfaria.com"
-      VIRTUAL_PORT: "9000"
+      VIRTUAL_PROTO: "https"
+      VIRTUAL_PORT: "9443"
     network_mode: bridge
 
 volumes:

@@ -5,7 +5,8 @@ services:
     image: hashicorp/vault:1.18.3
     container_name: vault
     environment:
-      VAULT_ADDR: "http://vault.local.andrecfaria.com:8200"
+      VAULT_ADDR: "https://vault.local.andrecfaria.com:8200"
+      VIRTUAL_PROTO: "https"
       VIRTUAL_HOST: "vault.local.andrecfaria.com"
       VIRTUAL_PORT: "8200"
     ports:
@@ -16,6 +17,7 @@ services:
       - vault_data:/vault/data/:rw
       - vault_file:/vault/file/:rw
       - "./vault-config.hcl:/vault/config/config.hcl:rw"
+      - "./certs:/certs/:rw"
     cap_add:
       - IPC_LOCK
     entrypoint: vault server -config /vault/config/config.hcl

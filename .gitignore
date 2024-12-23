@@ -21,3 +21,7 @@ packer_cache/
 unattend.pkrtpl
 **/iostor/*
 **/netkvm/*
+
+# Certificates
+**/certs/*
+**/vault/certs.tf

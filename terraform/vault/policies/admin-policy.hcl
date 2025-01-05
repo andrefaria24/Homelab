@@ -56,3 +56,8 @@ path "sys/mounts"
 path "pki*" {
   capabilities = [ "create", "read", "update", "delete", "list", "sudo", "patch" ]
 }
+
+# Work with kv2 secrets engine
+path "kvv2*" {
+  capabilities = [ "create", "read", "update", "delete", "list", "sudo", "patch" ]
+}

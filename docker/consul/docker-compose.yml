@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  consul-server:
+    image: hashicorp/consul:1.10.0
+    container_name: consul-server
+    environment:
+      VIRTUAL_PROTO: "https"
+      VIRTUAL_HOST: "consul.local.andrecfaria.com"
+      VIRTUAL_PORT: "8500"
+    ports:
+      - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    restart: unless-stopped
+    volumes:
+      - ./server.json:/consul/config/server.json:ro
+      - consul_data:/consul/data/:rw
+    command: "agent"
+    network_mode: bridge
+
+volumes:
+  consul_data:

@@ -1,4 +1,2 @@
-proxmox_api_url = "https://your-proxmox-url:8006/api2/json"
-proxmox_api_token_id = "foo@pve!bar"
-proxmox_api_token_secret = "00000000-0000-0000-0000-000000000000"
-proxmox_node    = "your-proxmox-node"
+proxmox_node = "your-proxmox-node"
+vault_token  = "hvs.ABCDEFGHIJKLMN1234567890"

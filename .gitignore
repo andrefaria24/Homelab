@@ -24,4 +24,3 @@ unattend.pkrtpl
 
 # Certificates
 **/certs/*
-**/vault/certs.tf

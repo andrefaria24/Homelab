@@ -3,6 +3,11 @@ variable "proxmox_node" {
   type        = string
 }
 
+variable "vault_address" {
+  description = "Vault address"
+  type        = string
+}
+
 variable "vault_token" {
   description = "Vault token for Terraform auth"
   type        = string

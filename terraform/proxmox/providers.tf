@@ -15,7 +15,7 @@ terraform {
 }
 
 provider "vault" {
-  address = "https://vault.local.andrecfaria.com:8200"
+  address = var.vault_address
   token   = var.vault_token
 }
 

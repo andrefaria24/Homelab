@@ -1,5 +1,6 @@
 locals {
-  cert_ttl = 63072000 # 2 Years
+  cert_ttl      = 63072000 # 2 Years
+  cert_location = "./certs/"
 }
 
 # Vault
@@ -14,12 +15,12 @@ resource "vault_pki_secret_backend_cert" "vault" {
 
 resource "local_file" "vault_pvt_key" {
   content  = vault_pki_secret_backend_cert.vault.private_key
-  filename = "./certs/${vault_pki_secret_backend_cert.vault.common_name}.key"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.vault.common_name}.key"
 }
 
 resource "local_file" "vault_pub_key" {
   content  = vault_pki_secret_backend_cert.vault.certificate
-  filename = "./certs/${vault_pki_secret_backend_cert.vault.common_name}.crt"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.vault.common_name}.crt"
 }
 
 # Pi-hole
@@ -34,12 +35,12 @@ resource "vault_pki_secret_backend_cert" "pihole" {
 
 resource "local_file" "pihole_pvt_key" {
   content  = vault_pki_secret_backend_cert.pihole.private_key
-  filename = "./certs/${vault_pki_secret_backend_cert.pihole.common_name}.key"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.pihole.common_name}.key"
 }
 
 resource "local_file" "pihole_pub_key" {
   content  = vault_pki_secret_backend_cert.pihole.certificate
-  filename = "./certs/${vault_pki_secret_backend_cert.pihole.common_name}.crt"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.pihole.common_name}.crt"
 }
 
 # Portainer
@@ -54,12 +55,12 @@ resource "vault_pki_secret_backend_cert" "portainer" {
 
 resource "local_file" "portainer_pvt_key" {
   content  = vault_pki_secret_backend_cert.portainer.private_key
-  filename = "./certs/${vault_pki_secret_backend_cert.portainer.common_name}.key"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.portainer.common_name}.key"
 }
 
 resource "local_file" "portainer_pub_key" {
   content  = vault_pki_secret_backend_cert.portainer.certificate
-  filename = "./certs/${vault_pki_secret_backend_cert.portainer.common_name}.crt"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.portainer.common_name}.crt"
 }
 
 # UptimeKuma
@@ -74,12 +75,12 @@ resource "vault_pki_secret_backend_cert" "uptimekuma" {
 
 resource "local_file" "uptimekuma_pvt_key" {
   content  = vault_pki_secret_backend_cert.uptimekuma.private_key
-  filename = "./certs/${vault_pki_secret_backend_cert.uptimekuma.common_name}.key"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.uptimekuma.common_name}.key"
 }
 
 resource "local_file" "uptimekuma_pub_key" {
   content  = vault_pki_secret_backend_cert.uptimekuma.certificate
-  filename = "./certs/${vault_pki_secret_backend_cert.uptimekuma.common_name}.crt"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.uptimekuma.common_name}.crt"
 }
 
 # Router (RT-AX86U Pro)
@@ -94,12 +95,12 @@ resource "vault_pki_secret_backend_cert" "router" {
 
 resource "local_file" "router_pvt_key" {
   content  = vault_pki_secret_backend_cert.router.private_key
-  filename = "./certs/${vault_pki_secret_backend_cert.router.common_name}.key"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.router.common_name}.key"
 }
 
 resource "local_file" "router_pub_key" {
   content  = vault_pki_secret_backend_cert.router.certificate
-  filename = "./certs/${vault_pki_secret_backend_cert.router.common_name}.crt"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.router.common_name}.crt"
 }
 
 # Plex
@@ -114,12 +115,12 @@ resource "vault_pki_secret_backend_cert" "plex" {
 
 resource "local_file" "plex_pvt_key" {
   content  = vault_pki_secret_backend_cert.plex.private_key
-  filename = "./certs/${vault_pki_secret_backend_cert.plex.common_name}.key"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.plex.common_name}.key"
 }
 
 resource "local_file" "plex_pub_key" {
   content  = vault_pki_secret_backend_cert.plex.certificate
-  filename = "./certs/${vault_pki_secret_backend_cert.plex.common_name}.crt"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.plex.common_name}.crt"
 }
 
 # Proxmox
@@ -134,12 +135,12 @@ resource "vault_pki_secret_backend_cert" "proxmox" {
 
 resource "local_file" "proxmox_pvt_key" {
   content  = vault_pki_secret_backend_cert.proxmox.private_key
-  filename = "./certs/${vault_pki_secret_backend_cert.proxmox.common_name}.key"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.proxmox.common_name}.key"
 }
 
 resource "local_file" "proxmox_pub_key" {
   content  = vault_pki_secret_backend_cert.proxmox.certificate
-  filename = "./certs/${vault_pki_secret_backend_cert.proxmox.common_name}.crt"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.proxmox.common_name}.crt"
 }
 
 # Synology NAS
@@ -154,12 +155,12 @@ resource "vault_pki_secret_backend_cert" "nas" {
 
 resource "local_file" "nas" {
   content  = vault_pki_secret_backend_cert.nas.private_key
-  filename = "./certs/${vault_pki_secret_backend_cert.nas.common_name}.key"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.nas.common_name}.key"
 }
 
 resource "local_file" "nas_pub_key" {
   content  = vault_pki_secret_backend_cert.nas.certificate
-  filename = "./certs/${vault_pki_secret_backend_cert.nas.common_name}.crt"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.nas.common_name}.crt"
 }
 
 # Terraform
@@ -174,10 +175,10 @@ resource "vault_pki_secret_backend_cert" "terraform" {
 
 resource "local_file" "terraform" {
   content  = vault_pki_secret_backend_cert.terraform.private_key
-  filename = "./certs/${vault_pki_secret_backend_cert.terraform.common_name}.key"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.terraform.common_name}.key"
 }
 
 resource "local_file" "terraform_pub_key" {
   content  = vault_pki_secret_backend_cert.terraform.certificate
-  filename = "./certs/${vault_pki_secret_backend_cert.terraform.common_name}.crt"
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.terraform.common_name}.crt"
 }

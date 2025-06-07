@@ -16,6 +16,9 @@ packer.d.ts
 packer_cache/
 **/user-data
 
+# Docker
+.env
+
 # Packer - Windows Server 2022
 *.exe
 unattend.pkrtpl

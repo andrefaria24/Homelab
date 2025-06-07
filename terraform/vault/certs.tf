@@ -162,3 +162,23 @@ resource "local_file" "nas_pub_key" {
   content  = vault_pki_secret_backend_cert.nas.certificate
   filename = "${local.cert_location}${vault_pki_secret_backend_cert.nas.common_name}.crt"
 }
+
+# TFE
+resource "vault_pki_secret_backend_cert" "tfe" {
+  issuer_ref  = vault_pki_secret_backend_issuer.intermediate.issuer_ref
+  backend     = vault_pki_secret_backend_role.intermediate_role.backend
+  name        = vault_pki_secret_backend_role.intermediate_role.name
+  common_name = "faria-terraform.${var.cn_intermediate}"
+  ttl         = local.cert_ttl
+  revoke      = true
+}
+
+resource "local_file" "tfe" {
+  content  = vault_pki_secret_backend_cert.tfe.private_key
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.tfe.common_name}.key"
+}
+
+resource "local_file" "tfe_pub_key" {
+  content  = vault_pki_secret_backend_cert.tfe.certificate
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.tfe.common_name}.crt"
+}

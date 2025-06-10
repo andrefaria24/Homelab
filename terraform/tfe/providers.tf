@@ -18,7 +18,7 @@ provider "tfe" {
   hostname        = var.terraform_address
   token           = var.tfe_token
   organization    = var.tfe_organization
-  ssl_skip_verify = true
+  ssl_skip_verify = false
 }
 
 provider "vault" {

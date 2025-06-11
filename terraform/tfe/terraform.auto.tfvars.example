@@ -1,7 +1,13 @@
-vault_address = "https://vault.local:8200"
-vault_token  = "hvs.ABCDEFGHIJKLMN1234567890"
-
 terraform_address = "https://terraform.local"
 tfe_token     = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-tfe_default_org = "Default-Org"
+tfe_organization = "Default-Org"
 tfe_email = "foo@bar.com"
+
+proxmox_info = {
+  "proxmox_node" = "test-proxmox-node"
+}
+
+vault_info = {
+  "vault_address" = "https://vault.local:8200"
+  "vault_token"   = "hvs.000000000000000000000000"
+}

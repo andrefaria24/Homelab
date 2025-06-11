@@ -1,5 +1,5 @@
 locals {
-  terraform_version = "~>1.10.0"
+  terraform_version = "1.10.1"
 }
 
 resource "tfe_workspace" "proxmox" {

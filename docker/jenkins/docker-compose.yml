@@ -7,7 +7,7 @@ services:
       - jenkins_data:/var/jenkins_home
     network_mode: bridge
     environment:
-      VIRTUAL_HOST: "jenkins.local.andrecfaria.com"
+      VIRTUAL_HOST: ${HOSTNAME}
       VIRTUAL_PORT: "8080"
   ssh-agent:
     image: jenkins/ssh-agent:6.4.0

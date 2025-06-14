@@ -9,7 +9,7 @@ services:
       - uptimekuma_data:/app/data
       - "./certs:/app/certs"
     environment:
-      VIRTUAL_HOST: "monitoring.local.andrecfaria.com"
+      VIRTUAL_HOST: ${HOSTNAME}
       VIRTUAL_PORT: "3001"
       VIRTUAL_PROTO: "https"
       NODE_EXTRA_CA_CERTS: "/app/certs/ca-chain.pem"

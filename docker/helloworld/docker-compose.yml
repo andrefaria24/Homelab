@@ -5,4 +5,4 @@ services:
       - "8080:80"
     network_mode: bridge
     environment:
-      VIRTUAL_HOST: "helloworld.local.andrecfaria.com"
+      VIRTUAL_HOST: ${HOSTNAME}

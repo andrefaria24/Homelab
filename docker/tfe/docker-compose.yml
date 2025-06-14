@@ -12,8 +12,8 @@ services:
       TFE_TLS_KEY_FILE: "/etc/ssl/private/terraform-enterprise/key.pem"
       TFE_TLS_CA_BUNDLE_FILE: "/etc/ssl/private/terraform-enterprise/bundle.pem"
       TFE_IACT_SUBNETS: "10.135.100.0/24, 172.170.0.0/24"
-      TFE_HOSTNAME: "faria-terraform.local.andrecfaria.com"
-      VIRTUAL_HOST: "faria-terraform.local.andrecfaria.com"
+      TFE_HOSTNAME: ${HOSTNAME}
+      VIRTUAL_HOST: ${HOSTNAME}
       VIRTUAL_PROTO: "https"
       VIRTUAL_PORT: "7443"
     cap_add:

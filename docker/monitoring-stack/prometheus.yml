@@ -22,4 +22,4 @@ scrape_configs:
   - job_name: node
     static_configs:
     - targets:
-        - docker.local.andrecfaria.com:9100
+        - ${TARGET}

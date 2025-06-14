@@ -4,7 +4,7 @@ services:
     container_name: consul-server
     environment:
       VIRTUAL_PROTO: "https"
-      VIRTUAL_HOST: "consul.local.andrecfaria.com"
+      VIRTUAL_HOST: ${HOSTNAME}
       VIRTUAL_PORT: "8500"
     ports:
       - "8500:8500"

@@ -9,7 +9,7 @@ services:
     ports:
       - 9090:9090
     environment:
-      VIRTUAL_HOST: "prometheus.local.andrecfaria.com"
+      VIRTUAL_HOST: ${PROMETHEUS_HOSTNAME}
       VIRTUAL_PORT: "9090"
     network_mode: bridge
   node-exporter:
@@ -19,7 +19,7 @@ services:
     ports:
       - 9100:9100
     environment:
-      VIRTUAL_HOST: "node-exporter.local.andrecfaria.com"
+      VIRTUAL_HOST: ${NODE_EXPORTER_HOSTNAME}
       VIRTUAL_PORT: "9100"
     network_mode: bridge
   grafana:
@@ -29,7 +29,7 @@ services:
     ports:
       - 3000:3000
     environment:
-      VIRTUAL_HOST: "grafana.local.andrecfaria.com"
+      VIRTUAL_HOST: ${GRAFANA_HOSTNAME}
       VIRTUAL_PORT: "3000"
     volumes:
       - grafana_data:/var/lib/grafana

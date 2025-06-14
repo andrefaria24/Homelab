@@ -148,7 +148,7 @@ resource "vault_pki_secret_backend_cert" "nas" {
   issuer_ref  = vault_pki_secret_backend_issuer.intermediate.issuer_ref
   backend     = vault_pki_secret_backend_role.intermediate_role.backend
   name        = vault_pki_secret_backend_role.intermediate_role.name
-  common_name = "faria-nas.${var.cn_intermediate}"
+  common_name = "nas.${var.cn_intermediate}"
   ttl         = local.cert_ttl
   revoke      = true
 }

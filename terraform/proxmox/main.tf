@@ -39,19 +39,19 @@ resource "proxmox_vm_qemu" "docker-hosts" {
 
   target_node = local.target_node
   # vmid        = 301 + count.index
-  name        = "faria-docker-${count.index + 1}"
-  desc        = "Docker production environment"
+  name = "faria-docker-${count.index + 1}"
+  desc = "Docker production environment"
   # clone       = local.clone
-  full_clone  = local.full_clone
+  full_clone             = local.full_clone
   define_connection_info = false
-  onboot      = local.onboot
-  os_type     = local.os_type
-  cores       = local.cores
-  sockets     = local.sockets
-  cpu         = local.cpu
-  memory      = local.memory
-  skip_ipv6   = local.skip_ipv6
-  agent       = local.agent
+  onboot                 = local.onboot
+  os_type                = local.os_type
+  cores                  = local.cores
+  sockets                = local.sockets
+  cpu                    = local.cpu
+  memory                 = local.memory
+  skip_ipv6              = local.skip_ipv6
+  agent                  = local.agent
 
   disks {
     ide {

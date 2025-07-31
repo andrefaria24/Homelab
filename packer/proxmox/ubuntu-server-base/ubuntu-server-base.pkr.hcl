@@ -10,19 +10,6 @@ packer {
 }
 
 # Variable Definitions
-variable "proxmox_api_url" {
-  type = string
-}
-
-variable "proxmox_api_token_id" {
-  type = string
-}
-
-variable "proxmox_api_token_secret" {
-  type      = string
-  sensitive = true
-}
-
 variable "proxmox_node" {
   type = string
 }
@@ -48,10 +35,10 @@ variable "ssh_password" {
 source "proxmox-iso" "ubuntu-server-template" {
 
   # Proxmox Connection Settings
-  proxmox_url              = "${var.proxmox_api_url}"
-  username                 = "${var.proxmox_api_token_id}"
-  token                    = "${var.proxmox_api_token_secret}"
-  insecure_skip_tls_verify = true # Skip TLS Verification
+  proxmox_url              = vault("/kvv2/data/proxmox", "api_url")
+  username                 = vault("/kvv2/data/proxmox", "api_token_id")
+  token                    = vault("/kvv2/data/proxmox", "api_token_secret")
+  insecure_skip_tls_verify = false
 
   # VM General Settings
   node                 = "${var.proxmox_node}"
@@ -79,13 +66,13 @@ source "proxmox-iso" "ubuntu-server-template" {
   network_adapters {
     model    = "e1000"
     bridge   = "vmbr0"
-    firewall = "false"
+    firewall = false
   }
 
   # Cloud-Init Settings
   cloud_init              = true
   cloud_init_storage_pool = "local-zfs"
-
+  
   # Packer Boot Commands
   boot_command = [
     "<esc><wait>",

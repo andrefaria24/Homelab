@@ -3,7 +3,7 @@
 packer {
   required_plugins {
     proxmox = {
-      version = "=1.2.2"
+      version = "=1.2.3"
       source  = "github.com/hashicorp/proxmox"
     }
   }
@@ -64,9 +64,9 @@ source "proxmox-iso" "ubuntu-server-template" {
   }
 
   network_adapters {
-    model    = "e1000"
+    model    = "virtio"
     bridge   = "vmbr0"
-    firewall = false
+    firewall = "false"
   }
 
   # Cloud-Init Settings
@@ -88,7 +88,7 @@ source "proxmox-iso" "ubuntu-server-template" {
   communicator = "ssh"
 
   # Packer Autoinstall Settings
-  http_directory    = "http"
+  http_directory    = "./http"
   http_bind_address = "${var.packer_http_bind_address}"
   http_port_min     = 8802
   http_port_max     = 8802
@@ -102,7 +102,7 @@ source "proxmox-iso" "ubuntu-server-template" {
 
   # Timeout Settings
   ssh_timeout = "15m"
-  ssh_pty     = true
+  ssh_pty     = false
 }
 
 # VM Template Build Definition

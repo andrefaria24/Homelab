@@ -12,5 +12,12 @@ docker-wrk-1.domain.local
 docker-wrk-2.domain.local
 docker-wrk-3.domain.local
 
+[k3s_servers]
+k3s-1.domain.local
+
+[k3s_agents]
+k3s-2.domain.local
+k3s-3.domain.local
+
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3

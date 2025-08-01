@@ -1,0 +1,72 @@
+- name: Setup K3s server
+  hosts: k3s_servers
+  become: true
+  vars:
+    k3s_version: v1.33.3+k3s1 # Specify K3s version
+    k3s_static_token: "<STATIC TOKEN>"
+  
+  tasks:
+    - name: Download the K3s install script
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: /tmp/k3s-install.sh
+        mode: '0755'
+
+    - name: Install K3s server
+      ansible.builtin.shell:
+        cmd: /tmp/k3s-install.sh
+      environment:
+        INSTALL_K3S_VERSION: "{{ k3s_version }}"
+        K3S_TOKEN: "{{ k3s_static_token }}"
+
+    - name: Check server health
+      ansible.builtin.wait_for:
+        port: 6443
+        host: "{{ ansible_default_ipv4.address }}"
+        state: started
+        delay: 5
+        timeout: 120
+      
+    - name: Create .kube directory
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.kube"
+        state: directory
+        mode: '0755'
+
+    - name: Copy kubeconfig from the server
+      ansible.builtin.copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "{{ ansible_env.HOME }}/.kube/config"
+        remote_src: true
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0600'
+        
+    - name: Adjust kubeconfig context
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.kube/config"
+        regexp: 'server: https://127.0.0.1:6443'
+        line: "server: https://{{ ansible_default_ipv4.address }}:6443"
+      
+- name: Setup K3s agents
+  hosts: k3s_agents
+  become: true
+  vars:
+    k3s_version: v1.33.3+k3s1
+    k3s_server_url: https://{{ hostvars[groups['k3s_servers'][0]]['ansible_default_ipv4']['address'] }}:6443
+    k3s_static_token: "<STATIC TOKEN>"
+
+  tasks:
+    - name: Download the K3s install script
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: /tmp/k3s-install.sh
+        mode: '0755'
+
+    - name: Install K3s agent
+      ansible.builtin.shell:
+        cmd: /tmp/k3s-install.sh
+      environment:
+        INSTALL_K3S_VERSION: "{{ k3s_version }}"
+        K3S_URL: "{{ k3s_server_url }}"
+        K3S_TOKEN: "{{ k3s_static_token }}"

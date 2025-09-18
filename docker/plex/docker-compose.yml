@@ -1,0 +1,30 @@
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:1.42.1
+    container_name: plex
+    network_mode: bridge
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=EST
+      - VERSION=docker
+    ports:
+      - 32400:32400
+    volumes:
+      - plex_data:/config
+      - plex_tv:/tv
+      - plex_movies:/movies
+    restart: unless-stopped
+
+volumes:
+  plex_data:
+  plex_movies:
+    driver_opts:
+      type: cifs
+      o: username=${USERNAME},password=${PASSWORD},file_mode=0777,dir_mode=0777,vers=3.0
+      device: //${PLEX_SERVER}/${PLEX_SHARE}/${MOVIES_PATH}/
+  plex_tv:
+    driver_opts:
+      type: cifs
+      o: username=${USERNAME},password=${PASSWORD},file_mode=0777,dir_mode=0777,vers=3.0
+      device: //${PLEX_SERVER}/${PLEX_SHARE}/${SHOWS_PATH}/

@@ -10,3 +10,7 @@ issuer_name = "domain.local-root"
 allowed_domains = ["domain.local"]
 
 cn_intermediate_role_name = "local-dot-domain-dot-local"
+
+google_allowed_redirect_uris = ["https://vault.domain.local/ui/vault/auth/oidc/oidc/callback"]
+google_client_id             = "00000000000-xxxxxxxxxxxxxxx123456.apps.googleusercontent.com"
+google_client_secret         = "XOOO-xxxxxxxxxxxxxx1234_X00"

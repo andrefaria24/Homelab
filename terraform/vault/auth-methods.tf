@@ -1,11 +1,6 @@
 # Enable Userpass authentication
 resource "vault_auth_backend" "userpass" {
   type = "userpass"
-
-  tune {
-    max_lease_ttl      = "30m"
-    listing_visibility = "unauth"
-  }
 }
 
 # Create admin user for userpass auth
@@ -30,6 +25,10 @@ resource "vault_jwt_auth_backend" "oidc" {
   oidc_client_id     = var.google_client_id
   oidc_client_secret = var.google_client_secret
   default_role       = "google"
+
+  tune {
+    listing_visibility = "unauth"
+  }
 }
 
 # Configure OIDC role for Google accounts

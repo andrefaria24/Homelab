@@ -21,3 +21,24 @@ resource "vault_generic_endpoint" "admin" {
 }
 EOT
 }
+
+# Enable OIDC authentication
+resource "vault_jwt_auth_backend" "oidc" {
+  type               = "oidc"
+  path               = "oidc"
+  oidc_discovery_url = "https://accounts.google.com"
+  oidc_client_id     = var.google_client_id
+  oidc_client_secret = var.google_client_secret
+  default_role       = "google"
+}
+
+# Configure OIDC role for Google accounts
+resource "vault_jwt_auth_backend_role" "google" {
+  backend               = vault_jwt_auth_backend.oidc.path
+  role_name             = "google"
+  user_claim            = "sub"
+  bound_audiences       = [var.google_client_id]
+  allowed_redirect_uris = var.google_allowed_redirect_uris
+  token_policies        = ["admin"]
+  role_type             = "oidc"
+}

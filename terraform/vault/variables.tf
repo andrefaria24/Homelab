@@ -44,3 +44,20 @@ variable "cn_intermediate_role_name" {
   description = "CN intermediate role name"
   type        = string
 }
+
+variable "google_allowed_redirect_uris" {
+  description = "Google OIDC allowed redirect URIs"
+  type        = list(string)
+}
+
+variable "google_client_id" {
+  description = "Google OIDC client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "google_client_secret" {
+  description = "Google OIDC client secret"
+  type        = string
+  sensitive   = true
+}

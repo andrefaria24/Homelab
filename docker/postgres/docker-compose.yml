@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:14.19
+    restart: unless-stopped
+    shm_size: 128mb
+    environment:
+      VIRTUAL_HOST: ${HOSTNAME}
+      VIRTUAL_PORT: "5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    network_mode: bridge
+
+volumes:
+  db_data:

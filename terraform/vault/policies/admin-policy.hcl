@@ -61,3 +61,8 @@ path "pki*" {
 path "kvv2*" {
   capabilities = [ "create", "read", "update", "delete", "list", "sudo", "patch" ]
 }
+
+# Work with transit secrets engine
+path "transit*" {
+  capabilities = [ "create", "read", "update", "delete", "list", "sudo", "patch" ]
+}

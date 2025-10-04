@@ -1,0 +1,19 @@
+services:
+  terraform-mcp-server:
+    container_name: terraform-mcp-server
+    restart: unless-stopped
+    image: hashicorp/terraform-mcp-server:0.3.1
+    ports:
+      - "8080:8080"                     # StreamableHTTP transport
+    environment:
+      - TRANSPORT_MODE=streamable-http  # Recommended for remote/distributed setups
+      - TRANSPORT_HOST=0.0.0.0          # Allows connections from outside the container
+      # HCP Terraform/TFE integration
+      # - TFE_ADDRESS=${TFE_ADDRESS}
+      # - TFE_TOKEN=${TFE_TOKEN}
+    volumes:
+      - mcp_tf_data:/app/data
+    network_mode: bridge
+
+volumes:
+  mcp_tf_data:

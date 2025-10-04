@@ -202,3 +202,23 @@ resource "local_file" "boundary_pub_key" {
   content  = vault_pki_secret_backend_cert.boundary.certificate
   filename = "${local.cert_location}${vault_pki_secret_backend_cert.boundary.common_name}.crt"
 }
+
+# n8n
+resource "vault_pki_secret_backend_cert" "n8n" {
+  issuer_ref  = vault_pki_secret_backend_issuer.intermediate.issuer_ref
+  backend     = vault_pki_secret_backend_role.intermediate_role.backend
+  name        = vault_pki_secret_backend_role.intermediate_role.name
+  common_name = "n8n.${var.cn_intermediate}"
+  ttl         = local.cert_ttl
+  revoke      = true
+}
+
+resource "local_file" "n8n" {
+  content  = vault_pki_secret_backend_cert.n8n.private_key
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.n8n.common_name}.key"
+}
+
+resource "local_file" "n8n_pub_key" {
+  content  = vault_pki_secret_backend_cert.n8n.certificate
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.n8n.common_name}.crt"
+}

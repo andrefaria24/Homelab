@@ -28,6 +28,13 @@ resource "vault_jwt_auth_backend" "oidc" {
 
   tune {
     listing_visibility = "unauth"
+    allowed_response_headers     = []
+    audit_non_hmac_request_keys  = []
+    audit_non_hmac_response_keys = []
+    passthrough_request_headers  = []
+    default_lease_ttl            = "768h"
+    max_lease_ttl                = "30m"
+    token_type                   = "default-service"
   }
 }
 

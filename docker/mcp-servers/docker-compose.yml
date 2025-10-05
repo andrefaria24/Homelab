@@ -1,0 +1,36 @@
+services:
+  terraform-mcp-server:
+    container_name: terraform-mcp-server
+    restart: unless-stopped
+    image: hashicorp/terraform-mcp-server:0.3.1
+    ports:
+      - "8081:8080"
+    environment:
+      - TRANSPORT_MODE=streamable-http
+      - TRANSPORT_HOST=0.0.0.0
+      # - TFE_ADDRESS=${TFE_ADDRESS}
+      # - TFE_TOKEN=${TFE_TOKEN}
+    volumes:
+      - mcp_tf_data:/app/data
+    network_mode: bridge
+  
+  vault-mcp-server:
+    container_name: vault-mcp-server
+    restart: unless-stopped
+    image: hashicorp/vault-mcp-server:0.2.0
+    ports:
+      - "8082:8080"
+    environment:
+      - TRANSPORT_MODE=http
+      - TRANSPORT_HOST=0.0.0.0
+      - VAULT_ADDR=${VAULT_ADDR}
+      - VAULT_TOKEN=${VAULT_TOKEN}
+      #- VAULT_NAMESPACE=${VAULT_NAMESPACE}
+    volumes:
+      - mcp_vault_data:/app/data
+    network_mode: bridge
+
+
+volumes:
+  mcp_tf_data:
+  mcp_vault_data:

@@ -1,6 +1,6 @@
 services:
   uptime-kuma:
-    image: louislam/uptime-kuma:1.23.16
+    image: louislam/uptime-kuma:${UPTIME_KUMA_VERSION}
     container_name: uptime-kuma
     restart: unless-stopped
     ports:
@@ -9,12 +9,12 @@ services:
       - uptimekuma_data:/app/data
       - "./certs:/app/certs"
     environment:
-      VIRTUAL_HOST: ${HOSTNAME}
+      VIRTUAL_HOST: "${SUBDOMAIN}.${DOMAIN}"
       VIRTUAL_PORT: "3001"
       VIRTUAL_PROTO: "https"
-      NODE_EXTRA_CA_CERTS: "/app/certs/ca-chain.pem"
-      UPTIME_KUMA_SSL_CERT: "/app/certs/uptimekuma.crt"
-      UPTIME_KUMA_SSL_KEY: "/app/certs/uptimekuma.key"
+      NODE_EXTRA_CA_CERTS: "/app/certs/${DOMAIN}.pem"
+      UPTIME_KUMA_SSL_CERT: "/app/certs/${SUBDOMAIN}.${DOMAIN}.crt"
+      UPTIME_KUMA_SSL_KEY: "/app/certs/${SUBDOMAIN}.${DOMAIN}.key"
     network_mode: bridge
 
 volumes:

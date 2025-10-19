@@ -1,6 +1,6 @@
 services:
   vault:
-    image: hashicorp/vault:${VAULT_VERSION}
+    image: hashicorp/vault:${VERSION}
     container_name: vault
     environment:
       VAULT_ADDR: "https://${VAULT_HOSTNAME}:8200"
@@ -25,4 +25,3 @@ volumes:
   vault_logs:
   vault_data:
   vault_file:
-  

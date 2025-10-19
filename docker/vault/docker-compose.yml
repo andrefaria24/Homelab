@@ -1,11 +1,11 @@
 services:
   vault:
-    image: hashicorp/vault:1.18.5
+    image: hashicorp/vault:${VAULT_VERSION}
     container_name: vault
     environment:
-      VAULT_ADDR: "https://${HOSTNAME}:8200"
+      VAULT_ADDR: "https://${VAULT_HOSTNAME}:8200"
       VIRTUAL_PROTO: "https"
-      VIRTUAL_HOST: ${HOSTNAME}
+      VIRTUAL_HOST: ${VAULT_HOSTNAME}
       VIRTUAL_PORT: "8200"
     ports:
       - "8200:8200"
@@ -25,3 +25,4 @@ volumes:
   vault_logs:
   vault_data:
   vault_file:
+  

@@ -66,3 +66,8 @@ path "kvv2*" {
 path "transit*" {
   capabilities = [ "create", "read", "update", "delete", "list", "sudo", "patch" ]
 }
+
+# Work with SSH secrets engine
+path "ssh*" {
+  capabilities = [ "create", "read", "update", "delete", "list", "sudo", "patch" ]
+}

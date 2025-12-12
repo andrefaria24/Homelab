@@ -4,12 +4,12 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.1-rc4"
+      version = "3.0.2-rc06"
     }
 
     vault = {
       source  = "hashicorp/vault"
-      version = "5.0.0"
+      version = "5.6.0"
     }
   }
 }

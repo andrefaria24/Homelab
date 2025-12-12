@@ -24,6 +24,6 @@ provider "proxmox" {
   pm_api_token_id     = ephemeral.vault_kv_secret_v2.proxmox.data["api_token_id"]
   pm_api_token_secret = ephemeral.vault_kv_secret_v2.proxmox.data["api_token_secret"]
 
-  pm_tls_insecure = true
+  pm_tls_insecure = false
   pm_timeout      = 900
 }

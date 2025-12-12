@@ -27,7 +27,7 @@ resource "vault_jwt_auth_backend" "oidc" {
   default_role       = "google"
 
   tune {
-    listing_visibility = "unauth"
+    listing_visibility           = "unauth"
     allowed_response_headers     = []
     audit_non_hmac_request_keys  = []
     audit_non_hmac_response_keys = []

@@ -61,3 +61,13 @@ variable "google_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "allowed_ssh_users" {
+  description = "Allowed SSH users"
+  type        = string
+}
+
+variable "ssh_cidr" {
+  description = "Allowed SSH CIDR block"
+  type        = string
+}

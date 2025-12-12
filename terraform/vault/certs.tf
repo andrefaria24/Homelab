@@ -124,23 +124,42 @@ resource "local_file" "plex_pub_key" {
 }
 
 # Proxmox
-resource "vault_pki_secret_backend_cert" "proxmox" {
+resource "vault_pki_secret_backend_cert" "proxmox-1" {
   issuer_ref  = vault_pki_secret_backend_issuer.intermediate.issuer_ref
   backend     = vault_pki_secret_backend_role.intermediate_role.backend
   name        = vault_pki_secret_backend_role.intermediate_role.name
-  common_name = "proxmox.${var.cn_intermediate}"
+  common_name = "proxmox-1.${var.cn_intermediate}"
   ttl         = local.cert_ttl
   revoke      = true
 }
 
-resource "local_file" "proxmox_pvt_key" {
-  content  = vault_pki_secret_backend_cert.proxmox.private_key
-  filename = "${local.cert_location}${vault_pki_secret_backend_cert.proxmox.common_name}.key"
+resource "local_file" "proxmox-1_pvt_key" {
+  content  = vault_pki_secret_backend_cert.proxmox-1.private_key
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.proxmox-1.common_name}.key"
 }
 
-resource "local_file" "proxmox_pub_key" {
-  content  = vault_pki_secret_backend_cert.proxmox.certificate
-  filename = "${local.cert_location}${vault_pki_secret_backend_cert.proxmox.common_name}.crt"
+resource "local_file" "proxmox-1_pub_key" {
+  content  = vault_pki_secret_backend_cert.proxmox-1.certificate
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.proxmox-1.common_name}.crt"
+}
+
+resource "vault_pki_secret_backend_cert" "proxmox-2" {
+  issuer_ref  = vault_pki_secret_backend_issuer.intermediate.issuer_ref
+  backend     = vault_pki_secret_backend_role.intermediate_role.backend
+  name        = vault_pki_secret_backend_role.intermediate_role.name
+  common_name = "proxmox-2.${var.cn_intermediate}"
+  ttl         = local.cert_ttl
+  revoke      = true
+}
+
+resource "local_file" "proxmox-2_pvt_key" {
+  content  = vault_pki_secret_backend_cert.proxmox-2.private_key
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.proxmox-2.common_name}.key"
+}
+
+resource "local_file" "proxmox-2_pub_key" {
+  content  = vault_pki_secret_backend_cert.proxmox-2.certificate
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.proxmox-2.common_name}.crt"
 }
 
 # Synology NAS
@@ -161,46 +180,6 @@ resource "local_file" "nas" {
 resource "local_file" "nas_pub_key" {
   content  = vault_pki_secret_backend_cert.nas.certificate
   filename = "${local.cert_location}${vault_pki_secret_backend_cert.nas.common_name}.crt"
-}
-
-# TFE
-resource "vault_pki_secret_backend_cert" "tfe" {
-  issuer_ref  = vault_pki_secret_backend_issuer.intermediate.issuer_ref
-  backend     = vault_pki_secret_backend_role.intermediate_role.backend
-  name        = vault_pki_secret_backend_role.intermediate_role.name
-  common_name = "faria-terraform.${var.cn_intermediate}"
-  ttl         = local.cert_ttl
-  revoke      = true
-}
-
-resource "local_file" "tfe" {
-  content  = vault_pki_secret_backend_cert.tfe.private_key
-  filename = "${local.cert_location}${vault_pki_secret_backend_cert.tfe.common_name}.key"
-}
-
-resource "local_file" "tfe_pub_key" {
-  content  = vault_pki_secret_backend_cert.tfe.certificate
-  filename = "${local.cert_location}${vault_pki_secret_backend_cert.tfe.common_name}.crt"
-}
-
-# Boundary
-resource "vault_pki_secret_backend_cert" "boundary" {
-  issuer_ref  = vault_pki_secret_backend_issuer.intermediate.issuer_ref
-  backend     = vault_pki_secret_backend_role.intermediate_role.backend
-  name        = vault_pki_secret_backend_role.intermediate_role.name
-  common_name = "boundary.${var.cn_intermediate}"
-  ttl         = local.cert_ttl
-  revoke      = true
-}
-
-resource "local_file" "boundary" {
-  content  = vault_pki_secret_backend_cert.boundary.private_key
-  filename = "${local.cert_location}${vault_pki_secret_backend_cert.boundary.common_name}.key"
-}
-
-resource "local_file" "boundary_pub_key" {
-  content  = vault_pki_secret_backend_cert.boundary.certificate
-  filename = "${local.cert_location}${vault_pki_secret_backend_cert.boundary.common_name}.crt"
 }
 
 # n8n

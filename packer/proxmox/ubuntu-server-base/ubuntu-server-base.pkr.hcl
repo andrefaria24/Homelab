@@ -59,7 +59,7 @@ source "proxmox-iso" "ubuntu-server-template" {
   disks {
     disk_size    = "20G"
     format       = "raw"
-    storage_pool = "local-zfs"
+    storage_pool = "local-lvm"
     type         = "virtio"
   }
 

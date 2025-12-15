@@ -72,7 +72,7 @@ source "proxmox-iso" "ubuntu-server-template" {
   # Cloud-Init Settings
   cloud_init              = true
   cloud_init_storage_pool = "local-zfs"
-  
+
   # Packer Boot Commands
   boot_command = [
     "<esc><wait>",

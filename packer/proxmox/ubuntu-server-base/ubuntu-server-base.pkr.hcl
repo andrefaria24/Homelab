@@ -35,9 +35,9 @@ variable "ssh_password" {
 source "proxmox-iso" "ubuntu-server-template" {
 
   # Proxmox Connection Settings
-  proxmox_url              = vault("/kvv2/data/proxmox", "api_url")
-  username                 = vault("/kvv2/data/proxmox", "api_token_id")
-  token                    = vault("/kvv2/data/proxmox", "api_token_secret")
+  proxmox_url              = vault("/kvv2/data/proxmox/terraform", "api_url")
+  username                 = vault("/kvv2/data/proxmox/terraform", "api_token_id")
+  token                    = vault("/kvv2/data/proxmox/terraform", "api_token_secret")
   insecure_skip_tls_verify = false
 
   # VM General Settings

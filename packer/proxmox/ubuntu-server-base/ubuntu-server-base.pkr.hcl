@@ -3,7 +3,7 @@
 packer {
   required_plugins {
     proxmox = {
-      version = "=1.2.3"
+      version = "~> 1.2.3"
       source  = "github.com/hashicorp/proxmox"
     }
   }
@@ -71,7 +71,7 @@ source "proxmox-iso" "ubuntu-server-template" {
 
   # Cloud-Init Settings
   cloud_init              = true
-  cloud_init_storage_pool = "local-zfs"
+  cloud_init_storage_pool = "local-lvm"
 
   # Packer Boot Commands
   boot_command = [
@@ -79,13 +79,14 @@ source "proxmox-iso" "ubuntu-server-template" {
     "e<wait>",
     "<down><down><down><end>",
     "<bs><bs><bs><bs><wait>",
-    "autoinstall ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<wait>",
+    " autoinstall ip=dhcp ds=nocloud-net\\;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ---<wait>",
     "<f10><wait>"
   ]
 
-  boot         = "c"
-  boot_wait    = "10s"
-  communicator = "ssh"
+  boot              = "c"
+  boot_wait         = "10s"
+  boot_key_interval = "150ms"
+  communicator      = "ssh"
 
   # Packer Autoinstall Settings
   http_directory    = "./http"

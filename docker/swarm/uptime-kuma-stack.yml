@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  uptime-kuma:
+      image: louislam/uptime-kuma:1.23.16
+      ports:
+        - 3001:3001
+      environment:
+        NODE_EXTRA_CA_CERTS: "/app/certs/local.andrecfaria.com.pem"
+        UPTIME_KUMA_SSL_CERT: "/app/certs/monitoring.crt"
+        UPTIME_KUMA_SSL_KEY: "/app/certs/monitoring.key"
+      volumes:
+        - data:/data
+        - ./certs:/app/certs:ro
+      networks:
+        - network
+      deploy:
+        mode: replicated
+        replicas: 1
+        placement:
+          constraints: [node.role == worker]
+
+networks:
+  network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  data:

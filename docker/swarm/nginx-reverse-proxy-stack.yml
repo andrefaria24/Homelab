@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  nginx-reverse-proxy:
+      image: docker.io/jc21/nginx-proxy-manager:2.12.3
+      ports:
+        - 80:80
+        - 8181:81
+        - 443:443
+      volumes:
+        - data:/data
+        - certs:/etc/letsencrypt
+      networks:
+        - network
+      deploy:
+        mode: replicated
+        replicas: 1
+        placement:
+          constraints: [node.role == manager]
+
+networks:
+  network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  data:
+  certs:

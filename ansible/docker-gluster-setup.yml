@@ -1,0 +1,148 @@
+---
+- name: Deploy GlusterFS replica-3 shared storage
+  hosts: docker
+  become: true
+  vars:
+    gluster_volume_name: gv0
+    gluster_brick_dir: /data/gluster/brick1
+    gluster_mountpoint: /mnt/docker_shared
+    gluster_mount_subdir: data
+
+    # Use the first node in the gluster group as the "seed" for peer probe and mount source.
+    gluster_seed: "{{ groups['docker'][0] }}"
+    gluster_mount_src: "{{ gluster_seed }}:/{{ gluster_volume_name }}"
+
+  pre_tasks:
+    - name: Ensure hostname resolves locally
+      ansible.builtin.debug:
+        msg: "Node {{ inventory_hostname }}; seed={{ gluster_seed }}; mount_src={{ gluster_mount_src }}"
+
+  tasks:
+    - name: Install GlusterFS server packages (Debian/Ubuntu)
+      ansible.builtin.apt:
+        name:
+          - glusterfs-server
+          - glusterfs-client
+        state: present
+        update_cache: true
+      when: ansible_facts.os_family == "Debian"
+
+    - name: Show OS facts (to confirm install tasks run)
+      ansible.builtin.debug:
+        msg:
+          - "os_family={{ ansible_facts.os_family }}"
+          - "distribution={{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+          - "service_mgr={{ ansible_facts.service_mgr }}"
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Debug gluster-related services discovered
+      ansible.builtin.debug:
+        msg: "{{ ansible_facts.services.keys() | select('search', 'gluster|glusterd') | list }}"
+
+
+    - name: Ensure glusterd is enabled and running
+      ansible.builtin.service:
+        name: glusterd
+        state: started
+        enabled: true
+
+    - name: Ensure brick directory exists
+      ansible.builtin.file:
+        path: "{{ gluster_brick_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    # ----- Cluster formation (run only on seed) -----
+    - name: Probe peers from seed
+      ansible.builtin.command: "gluster peer probe {{ item }}"
+      register: peer_probe
+      changed_when: "'peer probe: success' in peer_probe.stdout or 'peer probe: success' in peer_probe.stderr"
+      failed_when: false
+      loop: "{{ groups['docker'] | difference([gluster_seed]) }}"
+      when: inventory_hostname == gluster_seed
+
+    - name: Wait for peers to connect (seed)
+      ansible.builtin.command: "gluster peer status"
+      register: peer_status
+      changed_when: false
+      retries: 20
+      delay: 3
+      until: >
+        (peer_status.stdout is search("Peer in Cluster \\(Connected\\)"))
+        and
+        ((peer_status.stdout | regex_findall("Peer in Cluster \\(Connected\\)")) | length
+         >= (groups['docker'] | length) - 1)
+      when: inventory_hostname == gluster_seed
+
+    # ----- Volume create/start (run only on seed) -----
+    - name: Check if volume exists (seed)
+      ansible.builtin.command: "gluster volume info {{ gluster_volume_name }}"
+      register: vol_info
+      changed_when: false
+      failed_when: false
+      when: inventory_hostname == gluster_seed
+
+    - name: Create replica-3 volume (seed) if missing
+      ansible.builtin.command: >
+        gluster volume create {{ gluster_volume_name }} replica {{ groups['docker'] | length }}
+        {% for h in groups['docker'] -%}
+        {{ h }}:{{ gluster_brick_dir }}
+        {% endfor -%}
+        force
+      register: vol_create
+      changed_when: "'volume create: success' in vol_create.stdout or 'volume create: success' in vol_create.stderr"
+      when:
+        - inventory_hostname == gluster_seed
+        - vol_info.rc != 0
+
+    - name: Start volume (seed)
+      ansible.builtin.command: "gluster volume start {{ gluster_volume_name }}"
+      register: vol_start
+      changed_when: "'volume start: success' in vol_start.stdout or 'already started' in vol_start.stderr or 'already started' in vol_start.stdout"
+      failed_when: false
+      when: inventory_hostname == gluster_seed
+
+    # ----- Mount on all nodes -----
+    - name: Ensure mountpoint exists
+      ansible.builtin.file:
+        path: "{{ gluster_mountpoint }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Persist and mount GlusterFS volume
+      ansible.posix.mount:
+        path: "{{ gluster_mountpoint }}"
+        src: "{{ gluster_mount_src }}"
+        fstype: glusterfs
+        opts: "defaults,_netdev"
+        state: mounted
+
+    - name: Ensure shared subdir exists for apps
+      ansible.builtin.file:
+        path: "{{ gluster_mountpoint }}/{{ gluster_mount_subdir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0775"
+
+    # ----- Basic validation -----
+    - name: Write a node marker file on each node
+      ansible.builtin.copy:
+        dest: "{{ gluster_mountpoint }}/{{ gluster_mount_subdir }}/.marker-{{ inventory_hostname }}"
+        content: "Hello from {{ inventory_hostname }}\n"
+        mode: "0644"
+
+    - name: List markers (for visibility)
+      ansible.builtin.command: "ls -la {{ gluster_mountpoint }}/{{ gluster_mount_subdir }}"
+      register: ls_out
+      changed_when: false
+
+    - name: Show markers
+      ansible.builtin.debug:
+        var: ls_out.stdout_lines

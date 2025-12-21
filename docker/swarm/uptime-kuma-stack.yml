@@ -10,8 +10,14 @@ services:
         UPTIME_KUMA_SSL_CERT: "/app/certs/monitoring.crt"
         UPTIME_KUMA_SSL_KEY: "/app/certs/monitoring.key"
       volumes:
-        - data:/data
-        - ./certs:/app/certs:ro
+        - type: bind
+          source: /mnt/docker_shared/apps/uptime-kuma/data
+          target: /data
+
+        - type: bind
+          source: /mnt/docker_shared/apps/uptime-kuma/certs
+          target: /app/certs
+          read_only: true
       networks:
         - network
       deploy:
@@ -24,6 +30,3 @@ networks:
   network:
     driver: overlay
     attachable: true
-
-volumes:
-  data:

@@ -11,8 +11,14 @@ services:
         - 9443:9443
         - 9000:9000
       volumes:
-        - data:/data
-        - ./certs:/certs:ro
+        - type: bind
+          source: /mnt/docker_shared/apps/portainer/data
+          target: /data
+
+        - type: bind
+          source: /mnt/docker_shared/apps/portainer/certs
+          target: /certs
+          read_only: true
       networks:
         - network
       deploy:
@@ -37,6 +43,3 @@ networks:
   network:
     driver: overlay
     attachable: true
-
-volumes:
-  data:

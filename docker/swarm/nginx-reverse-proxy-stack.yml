@@ -8,8 +8,13 @@ services:
         - 8181:81
         - 443:443
       volumes:
-        - data:/data
-        - certs:/etc/letsencrypt
+        - type: bind
+          source: /mnt/docker_shared/apps/nginx-proxy-manager/data
+          target: /data
+        
+        - type: bind
+          source: /mnt/docker_shared/apps/nginx-proxy-manager/certs
+          target: /etc/letsencrypt
       networks:
         - network
       deploy:
@@ -22,7 +27,3 @@ networks:
   network:
     driver: overlay
     attachable: true
-
-volumes:
-  data:
-  certs:

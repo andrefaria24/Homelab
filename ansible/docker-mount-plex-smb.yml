@@ -1,0 +1,36 @@
+- name: Mount SMB share on all swarm nodes
+  hosts: docker_wrk_nodes
+  become: true
+  vars:
+    smb_share: "{{ lookup('community.general.dotenv', '.env', key='SMB_ADDR') }}"
+    mount_point: "/mnt/media/plex"
+    cred_file: "/etc/smb-plex.creds"
+    smb_user: "{{ lookup('community.general.dotenv', '.env', key='SMB_USER') }}"
+    smb_pass: "{{ lookup('community.general.dotenv', '.env', key='SMB_PASS') }}"
+  tasks:
+    - name: Install CIFS tools
+      package:
+        name: cifs-utils
+        state: present
+
+    - name: Write SMB credentials
+      copy:
+        dest: "{{ cred_file }}"
+        mode: "0600"
+        content: |
+          username={{ smb_user }}
+          password={{ smb_pass }}
+
+    - name: Ensure mount point exists
+      file:
+        path: "{{ mount_point }}"
+        state: directory
+        mode: "0755"
+
+    - name: Mount SMB share and persist in fstab
+      mount:
+        path: "{{ mount_point }}"
+        src: "{{ smb_share }}"
+        fstype: cifs
+        opts: "credentials={{ cred_file }},uid=1000,gid=1000,iocharset=utf8,vers=3.0"
+        state: mounted

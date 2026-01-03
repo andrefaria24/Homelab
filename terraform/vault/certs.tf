@@ -201,3 +201,23 @@ resource "local_file" "pulse_pub_key" {
   content  = vault_pki_secret_backend_cert.pulse.certificate
   filename = "${local.cert_location}${vault_pki_secret_backend_cert.pulse.common_name}.crt"
 }
+
+# Harness
+resource "vault_pki_secret_backend_cert" "harness" {
+  issuer_ref  = vault_pki_secret_backend_issuer.intermediate.issuer_ref
+  backend     = vault_pki_secret_backend_role.intermediate_role.backend
+  name        = vault_pki_secret_backend_role.intermediate_role.name
+  common_name = "harness.${var.cn_intermediate}"
+  ttl         = local.cert_ttl
+  revoke      = true
+}
+
+resource "local_file" "harness" {
+  content  = vault_pki_secret_backend_cert.harness.private_key
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.harness.common_name}.key"
+}
+
+resource "local_file" "harness_pub_key" {
+  content  = vault_pki_secret_backend_cert.harness.certificate
+  filename = "${local.cert_location}${vault_pki_secret_backend_cert.harness.common_name}.crt"
+}

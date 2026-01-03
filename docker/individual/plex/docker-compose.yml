@@ -1,30 +1,50 @@
+version: "3.9"
 services:
   plex:
-    image: lscr.io/linuxserver/plex:${VERSION}
+    image: lscr.io/linuxserver/plex:1.42.2
     container_name: plex
-    network_mode: bridge
+    networks:
+      plex_macvlan:
+        ipv4_address: 10.135.100.225
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=EST
+      - PUID=0
+      - PGID=0
+      - TZ=America/New_York
       - VERSION=docker
+      # - PLEX_CLAIM=claim-xxxxxxxxxxxxxxxxxxxx #plex.tv/claim
+    volumes:
+      - type: bind
+        source: "/mnt/media/plex/Plex/Movies/"
+        target: /movies
+
+      - type: bind
+        source: "/mnt/media/plex/Plex/TV Shows/"
+        target: /tv
+
+      - type: bind
+        source: /mnt/docker_shared/apps/plex/data
+        target: /config
+
+      - type: bind
+        source: /mnt/docker_shared/apps/plex/certs
+        target: /certs
+        read_only: true
     ports:
       - 32400:32400
-    volumes:
-      - plex_data:/config
-      - plex_tv:/tv
-      - plex_movies:/movies
-    restart: unless-stopped
+      # Optional: additional ports for DLNA, discovery, etc.
+      - 1900:1900/udp
+      - 32469:32469
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
 
-volumes:
-  plex_data:
-  plex_movies:
+networks:
+  plex_macvlan:
+    driver: macvlan
     driver_opts:
-      type: cifs
-      o: username=${USERNAME},password=${PASSWORD},file_mode=0777,dir_mode=0777,vers=3.0
-      device: //${PLEX_SERVER}/${PLEX_SHARE}/${MOVIES_PATH}/
-  plex_tv:
-    driver_opts:
-      type: cifs
-      o: username=${USERNAME},password=${PASSWORD},file_mode=0777,dir_mode=0777,vers=3.0
-      device: //${PLEX_SERVER}/${PLEX_SHARE}/${SHOWS_PATH}/
+      parent: eth0
+    ipam:
+      config:
+        - subnet: 10.135.100.0/24
+          gateway: 10.135.100.1

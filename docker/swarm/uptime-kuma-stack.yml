@@ -5,19 +5,10 @@ services:
       image: louislam/uptime-kuma:1.23.16
       ports:
         - 3001:3001
-      environment:
-        NODE_EXTRA_CA_CERTS: "/app/certs/local.andrecfaria.com.pem"
-        UPTIME_KUMA_SSL_CERT: "/app/certs/monitoring.crt"
-        UPTIME_KUMA_SSL_KEY: "/app/certs/monitoring.key"
       volumes:
         - type: bind
-          source: /mnt/docker_shared/apps/uptime-kuma/data
-          target: /data
-
-        - type: bind
-          source: /mnt/docker_shared/apps/uptime-kuma/certs
-          target: /app/certs
-          read_only: true
+          source: /mnt/docker_shared/apps/uptimekuma/data
+          target: /app/data
       networks:
         - network
       deploy:

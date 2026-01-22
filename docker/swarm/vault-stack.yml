@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   vault:
-      image: hashicorp/vault:1.21.1
+      image: hashicorp/vault-enterprise:1.21.1-ent
       ports:
         - 8200:8200
       entrypoint: vault server -config /vault/config/config.hcl
@@ -24,6 +24,10 @@ services:
         - type: bind
           source: /mnt/docker_shared/apps/vault/config/vault-config.hcl
           target: /vault/config/config.hcl
+
+        - type: bind
+          source: /mnt/docker_shared/apps/vault/config/vault.hclic
+          target: /vault/config/vault.hclic
       networks:
         - network
       deploy:

@@ -2,6 +2,7 @@ ui = true
 api_addr = "https://vault.local.andrecfaria.com:8200"
 cluster_name = "vault"
 disable_mlock = "true"
+license_path = "/vault/config/vault.hclic"
 
 storage "file" {
   path    = "/vault/data"

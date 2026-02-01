@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   terraform:
-      image: images.releases.hashicorp.com/hashicorp/terraform-enterprise:v202505-1
+      image: images.releases.hashicorp.com/hashicorp/terraform-enterprise:1.1.4
       environment:
         TFE_LICENSE: ${TFE_LICENSE}
         TFE_ENCRYPTION_PASSWORD: ${TFE_ENCRYPTION_PASSWORD}

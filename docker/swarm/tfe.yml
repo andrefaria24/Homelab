@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  terraform:
+      image: images.releases.hashicorp.com/hashicorp/terraform-enterprise:v202505-1
+      environment:
+        TFE_LICENSE: ${TFE_LICENSE}
+        TFE_ENCRYPTION_PASSWORD: ${TFE_ENCRYPTION_PASSWORD}
+        TFE_OPERATIONAL_MODE: "disk"
+        TFE_DISK_CACHE_VOLUME_NAME: "${COMPOSE_PROJECT_NAME}_tfe-cache"
+        TFE_TLS_CERT_FILE: "/etc/ssl/private/terraform-enterprise/cert.pem"
+        TFE_TLS_KEY_FILE: "/etc/ssl/private/terraform-enterprise/key.pem"
+        TFE_TLS_CA_BUNDLE_FILE: "/etc/ssl/private/terraform-enterprise/bundle.pem"
+        TFE_IACT_SUBNETS: ${TFE_IACT_SUBNETS}
+        TFE_HOSTNAME: ${HOSTNAME}
+      ports:
+        - "7080:80"
+        - "7443:443"
+      cap_add:
+        - IPC_LOCK
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+
+        - type: bind
+          source: /mnt/docker_shared/apps/tfe/data
+          target: /var/lib/terraform-enterprise
+
+        - type: bind
+          source: /mnt/docker_shared/apps/tfe/cache
+          target: /var/cache/tfe-task-worker/terraform
+
+        - type: bind
+          source: /mnt/docker_shared/apps/tfe/certs
+          target: /etc/ssl/private/terraform-enterprise
+      networks:
+        - network
+      deploy:
+        mode: replicated
+        replicas: 1
+        placement:
+          constraints: [node.role == worker]
+
+networks:
+  network:
+    driver: overlay
+    attachable: true

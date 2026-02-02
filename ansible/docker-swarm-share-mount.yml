@@ -1,0 +1,30 @@
+---
+- name: Mount Docker Swarm NFS share on all Docker hosts
+  hosts: docker
+  become: true
+  vars:
+    nfs_export: "nas.local.andrecfaria.com:/volume1/docker-swarm"
+    mount_point: "/mnt/docker-swarm"
+
+  tasks:
+    - name: Install NFS client utilities
+      ansible.builtin.apt:
+        name: nfs-common
+        state: present
+        update_cache: true
+
+    - name: Ensure mount point exists
+      ansible.builtin.file:
+        path: "{{ mount_point }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Mount NFS share and persist in fstab
+      ansible.posix.mount:
+        src: "{{ nfs_export }}"
+        path: "{{ mount_point }}"
+        fstype: nfs
+        opts: "defaults,nofail"
+        state: mounted

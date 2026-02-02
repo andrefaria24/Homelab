@@ -1,4 +1,50 @@
 ---
+- name: Configure Docker data root and NFS volume directories
+  hosts: docker_mgr_nodes:docker_wrk_nodes
+  become: true
+  gather_facts: true
+  vars:
+    docker_data_root: /var/lib/docker
+    docker_nfs_volume_dirs:
+      - /mnt/docker-swarm/volumes
+  tasks:
+    - name: Detect /mnt filesystem type
+      ansible.builtin.set_fact:
+        mnt_fstype: >-
+          {{
+            (ansible_facts.mounts
+              | selectattr('mount', 'equalto', '/mnt')
+              | map(attribute='fstype')
+              | list
+              | first)
+            | default('')
+          }}
+
+    - name: Ensure Docker NFS volume directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop: "{{ docker_nfs_volume_dirs }}"
+      when: mnt_fstype | length == 0 or mnt_fstype in ['cifs', 'smbfs', 'fuse.sshfs', 'nfs', 'nfs4']
+
+    - name: Set Docker data-root to local path
+      ansible.builtin.copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "data-root": "{{ docker_data_root }}"
+          }
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart Docker
+
+  handlers:
+    - name: Restart Docker
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+
 - name: Initialize Docker Swarm on first manager
   hosts: docker_mgr_nodes[0]
   become: true

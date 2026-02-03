@@ -1,22 +1,20 @@
-version: "3.9"
-
 services:
   portainer:
-      image: portainer/portainer-ce:2.38.0
+      image: portainer/portainer-ce:${PORTAINER_VERSION}
       command:
         -H tcp://tasks.agent:9001 --tlsskipverify
-        --tlscert /certs/portainer.crt
-        --tlskey /certs/portainer.key
+        --tlscert /certs/cert.pem
+        --tlskey /certs/key.pem
       ports:
         - 9443:9443
         - 9000:9000
       volumes:
         - type: bind
-          source: /mnt/docker_shared/apps/portainer/data
+          source: ${DOCKER_SWARM_STORAGE}/portainer/data
           target: /data
 
         - type: bind
-          source: /mnt/docker_shared/apps/portainer/certs
+          source: ${DOCKER_SWARM_STORAGE}/portainer/certs
           target: /certs
           read_only: true
       networks:
@@ -24,11 +22,9 @@ services:
       deploy:
         mode: replicated
         replicas: 1
-        placement:
-          constraints: [node.role == manager]
 
   agent:
-    image: portainer/agent:2.38.0
+    image: portainer/agent:${PORTAINER_VERSION}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/volumes:/var/lib/docker/volumes

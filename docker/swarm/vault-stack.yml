@@ -1,8 +1,6 @@
-version: "3.9"
-
 services:
   vault:
-      image: hashicorp/vault-enterprise:1.21.1-ent
+      image: "hashicorp/vault:${VAULT_VERSION}"
       ports:
         - 8200:8200
       entrypoint: vault server -config /vault/config/config.hcl
@@ -10,31 +8,26 @@ services:
         - IPC_LOCK
       volumes:
         - type: bind
-          source: /mnt/docker_shared/apps/vault/data
+          source: ${DOCKER_SWARM_STORAGE}/vault/data
           target: /vault/data
 
         - type: bind
-          source: /mnt/docker_shared/apps/vault/logs
+          source: ${DOCKER_SWARM_STORAGE}/vault/logs
           target: /vault/logs
 
         - type: bind
-          source: /mnt/docker_shared/apps/vault/certs
+          source: ${DOCKER_SWARM_STORAGE}/vault/certs
           target: /certs
         
         - type: bind
-          source: /mnt/docker_shared/apps/vault/config/vault-config.hcl
+          source: ${DOCKER_SWARM_STORAGE}/vault/config/vault-config.hcl
           target: /vault/config/config.hcl
 
-        - type: bind
-          source: /mnt/docker_shared/apps/vault/config/vault.hclic
-          target: /vault/config/vault.hclic
       networks:
         - network
       deploy:
         mode: replicated
         replicas: 1
-        placement:
-          constraints: [node.role == worker]
 
 networks:
   network:

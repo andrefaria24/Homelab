@@ -1,21 +1,17 @@
-version: "3.9"
-
 services:
   uptime-kuma:
-      image: louislam/uptime-kuma:1.23.17
+      image: louislam/uptime-kuma:${UPTIME_KUMA_VERSION}
       ports:
         - 3001:3001
       volumes:
         - type: bind
-          source: /mnt/docker_shared/apps/uptimekuma/data
+          source: ${DOCKER_SWARM_STORAGE}/uptimekuma/data
           target: /app/data
       networks:
         - network
       deploy:
         mode: replicated
         replicas: 1
-        placement:
-          constraints: [node.role == worker]
 
 networks:
   network:

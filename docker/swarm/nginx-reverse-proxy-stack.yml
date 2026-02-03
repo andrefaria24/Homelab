@@ -1,27 +1,23 @@
-version: "3.9"
-
 services:
   nginx-reverse-proxy:
-      image: docker.io/jc21/nginx-proxy-manager:2.12.3
+      image: "docker.io/jc21/nginx-proxy-manager:${NGINX_PROXY_VERSION}"
       ports:
         - 80:80
         - 8181:81
         - 443:443
       volumes:
         - type: bind
-          source: /mnt/docker_shared/apps/nginx-proxy-manager/data
+          source: ${DOCKER_SWARM_STORAGE}/nginx-proxy-manager/data
           target: /data
         
         - type: bind
-          source: /mnt/docker_shared/apps/nginx-proxy-manager/certs
+          source: ${DOCKER_SWARM_STORAGE}/nginx-proxy-manager/certs
           target: /etc/letsencrypt
       networks:
         - network
       deploy:
         mode: replicated
         replicas: 1
-        placement:
-          constraints: [node.role == manager]
 
 networks:
   network:

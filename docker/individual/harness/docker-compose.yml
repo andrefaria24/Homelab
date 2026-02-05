@@ -1,0 +1,18 @@
+services:
+  harness-delegate:
+    image: harness/delegate:${IMAGE_VERSION}
+    container_name: harness-delegate
+    restart: always
+    privileged: false
+    mem_limit: 512m
+    cpus: 1
+    environment:
+      - DELEGATE_NAME=${DELEGATE_NAME}
+      - NEXT_GEN=true
+      - DELEGATE_TYPE=DOCKER
+      - ACCOUNT_ID=${ACCOUNT_ID}
+      - DELEGATE_TOKEN=${DELEGATE_TOKEN}
+      - MANAGER_HOST_AND_PORT=${MANAGER_HOST_AND_PORT}
+      - DELEGATE_TAGS=${DELEGATE_TAGS}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

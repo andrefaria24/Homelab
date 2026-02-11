@@ -1,5 +1,6 @@
 services:
   uptime-kuma:
+      user: 1000:1000
       image: louislam/uptime-kuma:${UPTIME_KUMA_VERSION}
       ports:
         - 3001:3001
@@ -7,6 +8,12 @@ services:
         - type: bind
           source: ${DOCKER_SWARM_STORAGE}/uptimekuma/data
           target: /app/data
+        - type: bind
+          source: ${VAULT_CA_BUNDLE}
+          target: /etc/ssl/certs/vault-ca-bundle.pem
+          read_only: true
+      environment:
+        - NODE_EXTRA_CA_CERTS=/etc/ssl/certs/vault-ca-bundle.pem
       networks:
         - network
       deploy:

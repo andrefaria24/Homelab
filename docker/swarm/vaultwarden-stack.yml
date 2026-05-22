@@ -3,7 +3,7 @@ services:
       user: 1000:1000
       image: vaultwarden/server:${VAULT_WARDEN_VERSION}
       ports:
-        - 8000:8091
+        - 8091:80
       volumes:
         - type: bind
           source: ${VAULT_WARDEN_STORAGE}/data

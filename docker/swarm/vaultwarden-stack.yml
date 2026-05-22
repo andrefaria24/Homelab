@@ -1,0 +1,22 @@
+services:
+  vault-warden:
+      user: 1000:1000
+      image: vaultwarden/server:${VAULT_WARDEN_VERSION}
+      ports:
+        - 8000:8091
+      volumes:
+        - type: bind
+          source: ${VAULT_WARDEN_STORAGE}/data
+          target: /data
+      environment:
+        - DOMAIN=${VAULT_WARDEN_DOMAIN}
+      networks:
+        - network
+      deploy:
+        mode: replicated
+        replicas: 1
+
+networks:
+  network:
+    driver: overlay
+    attachable: true

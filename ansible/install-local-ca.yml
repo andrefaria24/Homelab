@@ -1,0 +1,106 @@
+---
+- name: Install local.andrecfaria.com CA certificate
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    local_ca_certificate_name: local.andrecfaria.com-ca-chain
+    local_ca_certificate_src: "./files/{{ local_ca_certificate_name }}.pem"
+    supported_ca_trust_os_families:
+      - Alpine
+      - Archlinux
+      - Debian
+      - RedHat
+      - Suse
+    ca_trust_store_settings:
+      Alpine:
+        packages:
+          - ca-certificates
+        anchor_dir: /usr/local/share/ca-certificates
+        anchor_extension: crt
+        update_command: update-ca-certificates
+      Archlinux:
+        packages:
+          - ca-certificates-utils
+        anchor_dir: /etc/ca-certificates/trust-source/anchors
+        anchor_extension: crt
+        update_command: trust extract-compat
+      Debian:
+        packages:
+          - ca-certificates
+        anchor_dir: /usr/local/share/ca-certificates
+        anchor_extension: crt
+        update_command: update-ca-certificates
+      RedHat:
+        packages:
+          - ca-certificates
+        anchor_dir: /etc/pki/ca-trust/source/anchors
+        anchor_extension: pem
+        update_command: update-ca-trust extract
+      Suse:
+        packages:
+          - ca-certificates
+        anchor_dir: /etc/pki/trust/anchors
+        anchor_extension: pem
+        update_command: update-ca-certificates
+
+  pre_tasks:
+    - name: Verify local CA certificate exists on Ansible controller
+      ansible.builtin.stat:
+        path: "{{ local_ca_certificate_src }}"
+      delegate_to: localhost
+      become: false
+      run_once: true
+      register: local_ca_certificate_stat
+
+    - name: Fail when local CA certificate is missing
+      ansible.builtin.assert:
+        that:
+          - local_ca_certificate_stat.stat.exists
+          - local_ca_certificate_stat.stat.isreg
+        fail_msg: "Expected CA certificate at {{ local_ca_certificate_src }}"
+      run_once: true
+
+    - name: Confirm target is a supported Linux distribution
+      ansible.builtin.assert:
+        that:
+          - ansible_system == "Linux"
+          - ansible_facts.os_family in supported_ca_trust_os_families
+        fail_msg: >-
+          {{ inventory_hostname }} is {{ ansible_system }} / {{ ansible_facts.os_family }},
+          which is not covered by this playbook.
+
+  tasks:
+    - name: Select certificate trust store configuration
+      ansible.builtin.set_fact:
+        ca_trust_settings: "{{ ca_trust_store_settings[ansible_facts.os_family] }}"
+
+    - name: Install CA certificate package
+      ansible.builtin.package:
+        name: "{{ ca_trust_settings.packages }}"
+        state: present
+      register: ca_certificate_package
+
+    - name: Ensure CA trust anchor directory exists
+      ansible.builtin.file:
+        path: "{{ ca_trust_settings.anchor_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Install local.andrecfaria.com CA certificate
+      ansible.builtin.copy:
+        src: "{{ local_ca_certificate_src }}"
+        dest: >-
+          {{ ca_trust_settings.anchor_dir }}/{{ local_ca_certificate_name }}.{{ ca_trust_settings.anchor_extension }}
+        owner: root
+        group: root
+        mode: "0644"
+      register: local_ca_certificate_copy
+
+    - name: Refresh system certificate trust store
+      ansible.builtin.command: "{{ ca_trust_settings.update_command }}"
+      when: ca_certificate_package.changed or local_ca_certificate_copy.changed
+      changed_when: true

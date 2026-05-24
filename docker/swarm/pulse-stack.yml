@@ -1,0 +1,22 @@
+services:
+  pulse:
+      image: rcourtman/pulse:${PULSE_VERSION}
+      ports:
+        - 7655:7655
+      volumes:
+        - type: bind
+          source: ${PULSE_STORAGE}/data
+          target: /data
+      environment:
+        - PULSE_AUTH_USER=${PULSE_AUTH_USER}
+        - PULSE_AUTH_PASS=${PULSE_AUTH_PASS}
+      networks:
+        - network
+      deploy:
+        mode: replicated
+        replicas: 1
+
+networks:
+  network:
+    driver: overlay
+    attachable: true

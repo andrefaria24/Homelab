@@ -1,6 +1,6 @@
 services:
   vault:
-      image: "hashicorp/vault:${VAULT_VERSION}"
+      image: "hashicorp/vault:2.0.1"
       ports:
         - 8200:8200
       entrypoint: vault server -config /vault/config/config.hcl
@@ -8,19 +8,19 @@ services:
         - IPC_LOCK
       volumes:
         - type: bind
-          source: ${DOCKER_SWARM_STORAGE}/vault/data
+          source: ${DATA_DIR}/vault/data
           target: /vault/data
 
         - type: bind
-          source: ${DOCKER_SWARM_STORAGE}/vault/logs
+          source: ${DATA_DIR}/vault/logs
           target: /vault/logs
 
         - type: bind
-          source: ${DOCKER_SWARM_STORAGE}/vault/certs
+          source: ${DATA_DIR}/vault/certs
           target: /certs
         
         - type: bind
-          source: ${DOCKER_SWARM_STORAGE}/vault/config/vault-config.hcl
+          source: ${DATA_DIR}/vault/config/vault-config.hcl
           target: /vault/config/config.hcl
 
       networks:

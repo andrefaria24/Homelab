@@ -1,0 +1,17 @@
+services:
+  helloworld:
+    image: nginxdemos/hello:0.2
+    ports:
+      - "9191:80"
+    networks:
+        - network
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+networks:
+  network:
+    driver: overlay
+    attachable: true

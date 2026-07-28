@@ -8,19 +8,19 @@ services:
         - IPC_LOCK
       volumes:
         - type: bind
-          source: ${DATA_DIR}/vault/data
+          source: ${DATA_DIR}
           target: /vault/data
 
         - type: bind
-          source: ${DATA_DIR}/vault/logs
+          source: ${LOG_DIR}
           target: /vault/logs
 
         - type: bind
-          source: ${DATA_DIR}/vault/certs
+          source: ${CERTS_DIR}
           target: /certs
         
         - type: bind
-          source: ${DATA_DIR}/vault/config/vault-config.hcl
+          source: ${VAULT_CONFIG_HCL}
           target: /vault/config/config.hcl
 
       networks:

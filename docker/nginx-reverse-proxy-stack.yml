@@ -1,17 +1,17 @@
 services:
   nginx-reverse-proxy:
-      image: "docker.io/jc21/nginx-proxy-manager:${NGINX_PROXY_VERSION}"
+      image: "docker.io/jc21/nginx-proxy-manager:2.14.0"
       ports:
         - 80:80
         - 8181:81
         - 443:443
       volumes:
         - type: bind
-          source: ${DOCKER_SWARM_STORAGE}/nginx-proxy-manager/data
+          source: ${DATA_DIR}
           target: /data
         
         - type: bind
-          source: ${DOCKER_SWARM_STORAGE}/nginx-proxy-manager/certs
+          source: ${CERTS_DIR}
           target: /etc/letsencrypt
       networks:
         - network

@@ -1,11 +1,11 @@
 services:
   pulse:
-      image: rcourtman/pulse:${PULSE_VERSION}
+      image: rcourtman/pulse:5.1.31
       ports:
         - 7655:7655
       volumes:
         - type: bind
-          source: ${PULSE_STORAGE}/data
+          source: ${DATA_DIR}
           target: /data
       environment:
         - PULSE_AUTH_USER=${PULSE_AUTH_USER}

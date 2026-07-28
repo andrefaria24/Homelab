@@ -8,9 +8,9 @@ services:
           source: ${DATA_DIR}
           target: /app/data
       environment:
-        - ALLOW_SIGNUP="false"
-        - LOG_LEVEL="ERROR"
-        - DB_ENGINE="sqlite"
+        ALLOW_SIGNUP: "false"
+        LOG_LEVEL: error
+        DB_ENGINE: sqlite
       networks:
         - network
       deploy:

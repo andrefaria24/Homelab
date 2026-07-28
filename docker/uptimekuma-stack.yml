@@ -1,15 +1,15 @@
 services:
   uptime-kuma:
       user: 1000:1000
-      image: louislam/uptime-kuma:${UPTIME_KUMA_VERSION}
+      image: louislam/uptime-kuma:2.3.2
       ports:
         - 3001:3001
       volumes:
         - type: bind
-          source: ${DOCKER_SWARM_STORAGE}/uptimekuma/data
+          source: ${DATA_DIR}
           target: /app/data
         - type: bind
-          source: ${VAULT_CA_BUNDLE}
+          source: ${HOMELAB_CA_CERTS}
           target: /etc/ssl/certs/vault-ca-bundle.pem
           read_only: true
       environment:

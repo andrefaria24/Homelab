@@ -1,0 +1,23 @@
+services:
+  mealie:
+      image: hkotel/mealie:v3.22.0
+      ports:
+        - 9292:9000
+      volumes:
+        - type: bind
+          source: ${DATA_DIR}
+          target: /app/data/
+      environment:
+        - ALLOW_SIGNUP: "false"
+        - LOG_LEVEL: "ERROR"
+        - DB_ENGINE: sqlite
+      networks:
+        - network
+      deploy:
+        mode: replicated
+        replicas: 1
+
+networks:
+  network:
+    driver: overlay
+    attachable: true

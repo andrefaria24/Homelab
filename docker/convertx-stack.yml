@@ -1,15 +1,12 @@
 services:
   convertx:
-      image: "c4illin/convertx:${CONVERTX_VERSION}"
+      image: "c4illin/convertx:main"
       ports:
         - 3000:3000
       volumes:
         - type: bind
-          source: ${DOCKER_SWARM_STORAGE}/convertx/data
+          source: ${DATA_DIR}
           target: /app/data
-      environment:
-        - JWT_SECRET=${CONVERTX_JWT} # will use randomUUID() if unset
-      # - HTTP_ALLOWED=true # uncomment this if accessing it over a non-https connection
       networks:
         - network
       deploy:

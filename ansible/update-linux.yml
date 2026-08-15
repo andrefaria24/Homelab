@@ -2,6 +2,7 @@
 - name: Update all Linux systems
   hosts: all
   become: true
+  serial: 1
 
   tasks:
     - name: Detect Operating System

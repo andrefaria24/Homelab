@@ -6,6 +6,14 @@ services:
       entrypoint: vault server -config /vault/config/config.hcl
       cap_add:
         - IPC_LOCK
+      environment:
+        AWS_REGION: ${AWS_REGION}
+        VAULT_AWSKMS_SEAL_KEY_ID: ${VAULT_AWSKMS_SEAL_KEY_ID}
+      secrets:
+        - source: vault_aws_access_key_id
+          target: vault_aws_access_key_id
+        - source: vault_aws_secret_access_key
+          target: vault_aws_secret_access_key
       volumes:
         - type: bind
           source: ${DATA_DIR}
@@ -33,3 +41,9 @@ networks:
   network:
     driver: overlay
     attachable: true
+
+secrets:
+  vault_aws_access_key_id:
+    external: true
+  vault_aws_secret_access_key:
+    external: true

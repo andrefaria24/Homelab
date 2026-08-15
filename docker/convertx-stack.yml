@@ -7,6 +7,12 @@ services:
         - type: bind
           source: ${DATA_DIR}
           target: /app/data
+      healthcheck:
+        test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://127.0.0.1:3000/healthcheck"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 30s
       networks:
         - network
       deploy:

@@ -14,6 +14,12 @@ services:
           read_only: true
       environment:
         - NODE_EXTRA_CA_CERTS=/etc/ssl/certs/vault-ca-bundle.pem
+      healthcheck:
+        test: ["CMD", "/app/extra/healthcheck"]
+        interval: 60s
+        timeout: 30s
+        retries: 5
+        start_period: 180s
       networks:
         - network
       deploy:

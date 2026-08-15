@@ -10,6 +10,12 @@ services:
       environment:
         - PULSE_AUTH_USER=${PULSE_AUTH_USER}
         - PULSE_AUTH_PASS=${PULSE_AUTH_PASS}
+      healthcheck:
+        test: ["CMD", "/docker-healthcheck.sh"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 10s
       networks:
         - network
       deploy:

@@ -3,6 +3,12 @@ services:
     image: nginxdemos/hello:0.2
     ports:
       - "9191:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     networks:
         - network
     deploy:

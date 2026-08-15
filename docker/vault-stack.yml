@@ -31,6 +31,12 @@ services:
           source: ${VAULT_CONFIG_HCL}
           target: /vault/config/config.hcl
 
+      healthcheck:
+        test: ["CMD", "vault", "status", "-address=https://127.0.0.1:8200", "-tls-skip-verify"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+        start_period: 60s
       networks:
         - network
       deploy:

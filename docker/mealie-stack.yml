@@ -11,6 +11,12 @@ services:
         ALLOW_SIGNUP: "false"
         LOG_LEVEL: error
         DB_ENGINE: sqlite
+      healthcheck:
+        test: ["CMD", "/app/healthcheck.sh"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+        start_period: 60s
       networks:
         - network
       deploy:

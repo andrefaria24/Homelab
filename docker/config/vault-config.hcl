@@ -15,7 +15,7 @@ seal "awskms" {
 
 listener "tcp" {
   address = "0.0.0.0:8200"
-  tls_disable = "false"
+  tls_disable = "true"
   tls_cert_file = "../certs/cert.pem"
   tls_key_file  = "../certs/key.pem"
 }

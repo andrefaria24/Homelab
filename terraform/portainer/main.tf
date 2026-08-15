@@ -87,3 +87,22 @@ moved {
   from = portainer_stack.hermes
   to   = portainer_stack.stacks["hermes"]
 }
+
+locals {
+  vault_docker_secret_names = toset([
+    "vault_aws_access_key_id",
+    "vault_aws_secret_access_key",
+  ])
+}
+
+resource "portainer_docker_secret" "vault" {
+  for_each = local.vault_docker_secret_names
+
+  endpoint_id = portainer_environment.docker.id
+  name        = each.value
+  labels      = {}
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}

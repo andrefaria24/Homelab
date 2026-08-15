@@ -1,0 +1,3 @@
+portainer_address = "<PORTAINER_ADDRESS>"
+portainer_api_key = "<API_KEY>"
+repo_url          = "https://github.com/<your_username>/<repo_name>"

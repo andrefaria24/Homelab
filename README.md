@@ -34,18 +34,6 @@ The example Ansible inventory models one Swarm manager and three workers. Actual
 
 Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other eight Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
 
-| Stack | Image | Published ports | Desired status | Required Portainer variables |
-| --- | --- | --- | --- | --- |
-| Portainer | `portainer/portainer-ce:2.39.6` and `portainer/agent:2.39.6` | `9443`, `9000` | Bootstrap stack | `DOCKER_SWARM_STORAGE` |
-| Hello World | `nginxdemos/hello:0.2` | `9191` | Inactive | None |
-| Uptime Kuma | `louislam/uptime-kuma:2.5.0` | `3001` | Active | `DATA_DIR`, `HOMELAB_CA_CERTS` |
-| ConvertX | `c4illin/convertx:main` | `3000` | Inactive | `DATA_DIR` |
-| Pulse | `rcourtman/pulse:5.1.31` | `7655` | Active | `DATA_DIR`, `PULSE_AUTH_USER`, `PULSE_AUTH_PASS` |
-| Vault | `hashicorp/vault:2.0.4` | `8200` | Active | `DATA_DIR`, `LOG_DIR`, `CERTS_DIR`, `VAULT_CONFIG_HCL`, `AWS_REGION`, `VAULT_AWSKMS_SEAL_KEY_ID` |
-| Nginx Proxy Manager | `jc21/nginx-proxy-manager:2.15.1` | `80`, `8181`, `443` | Active | `DATA_DIR`, `CERTS_DIR` |
-| Mealie | `hkotel/mealie:v3.22.0` | `9292` | Inactive | `DATA_DIR` |
-| Hermes Agent | `nousresearch/hermes-agent:v2026.7.20` | `9119`, `8642` | Inactive | `DATA_DIR`, `OPENAI_KEY`, `DASHBOARD_USERNAME`, `DASHBOARD_PASSWORD`, `DASHBOARD_SECRET` |
-
 Each application stack has a health check for its primary service and uses a dedicated attachable overlay network. Persistent application data is bind-mounted from host paths supplied through Portainer variables. The Portainer agent is deployed globally and does not have an explicit Compose health check.
 
 The Ansible storage playbook mounts the NFS export `nas.local.andrecfaria.com:/volume1/docker-swarm` at `/mnt/docker-swarm` on Docker hosts. Any bind-mounted path used by a movable Swarm service must exist consistently on every eligible node.
@@ -76,6 +64,8 @@ Vault also expects the following external Docker secrets to exist before its sta
 
 - `vault_aws_access_key_id`
 - `vault_aws_secret_access_key`
+
+Both existing secrets are imported as `portainer_docker_secret` resources and protected with `prevent_destroy`. Docker does not return secret payloads after creation, so Terraform manages their names and metadata but does not contain the existing AWS credential values. Preserve the Terraform state; recreating or rotating either secret requires supplying a new value deliberately.
 
 ## Provisioning workflow
 

@@ -1,6 +1,6 @@
 services:
   nginx-reverse-proxy:
-      image: "docker.io/jc21/nginx-proxy-manager:2.14.0"
+      image: "docker.io/jc21/nginx-proxy-manager:2.15.1"
       ports:
         - 80:80
         - 8181:81

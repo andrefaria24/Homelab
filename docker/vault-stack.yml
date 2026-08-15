@@ -32,7 +32,7 @@ services:
           target: /vault/config/config.hcl
 
       healthcheck:
-        test: ["CMD", "vault", "status", "-address=https://127.0.0.1:8200", "-tls-skip-verify"]
+        test: ["CMD", "vault", "status", "-address=http://127.0.0.1:8200", "-tls-skip-verify"]
         interval: 30s
         timeout: 10s
         retries: 5

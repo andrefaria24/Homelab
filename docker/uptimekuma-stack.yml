@@ -1,7 +1,7 @@
 services:
   uptime-kuma:
       user: 1000:1000
-      image: louislam/uptime-kuma:2.3.2
+      image: louislam/uptime-kuma:2.5.0
       ports:
         - 3001:3001
       volumes:

@@ -22,6 +22,7 @@ services:
         start_period: 180s
       networks:
         - network
+        - proxy
       deploy:
         mode: replicated
         replicas: 1
@@ -30,3 +31,6 @@ networks:
   network:
     driver: overlay
     attachable: true
+  proxy:
+    name: homelab-proxy
+    external: true

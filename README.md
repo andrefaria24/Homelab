@@ -38,6 +38,10 @@ Each application stack has a health check for its primary service and uses a ded
 
 Pulse is intentionally pinned to the Swarm node labeled `pulse=true` and stores `/data` on that node at `/var/lib/pulse/data`. Pulse uses SQLite in WAL mode, so its database must not be placed on the shared NFS filesystem. The Swarm Ansible playbook creates the local directory on the first manager and applies the placement label. Pulse also has a 768 MiB memory limit and a bounded restart policy so a monitoring failure cannot exhaust an entire 2 GiB Docker node.
 
+Nginx Proxy Manager, Vault, and Uptime Kuma also join the external `homelab-proxy` overlay network. Proxy hosts should use the Swarm service names `vault:8200` and `uptime-kuma:3001` as their upstreams instead of routing back through a node's published ports. The Swarm Ansible playbook creates this network before Portainer deploys the stacks.
+
+Nginx Proxy Manager itself currently runs as a restart-managed container on the first manager rather than as a Swarm task. Docker Engine 29.7.2 can leave orphaned `DOCKER-INGRESS` DNAT rules that black-hole its published ports. Run `ansible-playbook nginx-reverse-proxy-standalone.yml` after the Swarm setup; the playbook creates NPM on the local bridge first and attaches `homelab-proxy` afterward. Its Portainer stack intentionally has zero replicas and no published ports to prevent a competing ingress service.
+
 The Ansible storage playbook mounts the NFS export `nas.local.andrecfaria.com:/volume1/docker-swarm` at `/mnt/docker-swarm` on Docker hosts. Any bind-mounted path used by a movable Swarm service must exist consistently on every eligible node.
 
 ### Portainer deployment behavior
@@ -105,6 +109,7 @@ The main playbooks are:
 ansible-playbook docker-setup.yml
 ansible-playbook docker-swarm-share-mount.yml
 ansible-playbook docker-swarm-setup.yml
+ansible-playbook nginx-reverse-proxy-standalone.yml
 ansible-playbook install-local-ca.yml
 ```
 

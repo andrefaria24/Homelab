@@ -1,0 +1,82 @@
+---
+- name: Run Nginx Proxy Manager outside the broken Swarm ingress publisher
+  hosts: docker_mgr_nodes[0]
+  become: true
+  vars:
+    npm_container_name: nginx-reverse-proxy
+    npm_image: docker.io/jc21/nginx-proxy-manager:2.15.1
+    npm_data_dir: /mnt/docker-swarm/app-data/nginx-proxy-manager/data
+    npm_certs_dir: /mnt/docker-swarm/app-data/nginx-proxy-manager/certs
+
+  tasks:
+    - name: Inspect Nginx Proxy Manager container
+      ansible.builtin.command:
+        cmd: docker container inspect {{ npm_container_name }}
+      register: npm_container
+      changed_when: false
+      failed_when: false
+
+    - name: Create Nginx Proxy Manager on the local bridge
+      ansible.builtin.command:
+        argv:
+          - docker
+          - run
+          - --detach
+          - --name
+          - "{{ npm_container_name }}"
+          - --restart
+          - unless-stopped
+          - --network
+          - bridge
+          - --publish
+          - 80:80
+          - --publish
+          - 443:443
+          - --publish
+          - 8181:81
+          - --volume
+          - "{{ npm_data_dir }}:/data"
+          - --volume
+          - "{{ npm_certs_dir }}:/etc/letsencrypt"
+          - --health-cmd
+          - /usr/bin/check-health
+          - --health-interval
+          - 30s
+          - --health-timeout
+          - 10s
+          - --health-retries
+          - "5"
+          - --health-start-period
+          - 30s
+          - "{{ npm_image }}"
+      when: npm_container.rc != 0
+
+    - name: Read Nginx Proxy Manager running state
+      ansible.builtin.command:
+        cmd: >-
+          docker container inspect
+          --format {% raw %}'{{ .State.Running }}'{% endraw %}
+          {{ npm_container_name }}
+      register: npm_running
+      changed_when: false
+
+    - name: Start Nginx Proxy Manager
+      ansible.builtin.command:
+        cmd: docker container start {{ npm_container_name }}
+      when: npm_running.stdout != "true"
+
+    - name: Read Nginx Proxy Manager networks
+      ansible.builtin.command:
+        cmd: >-
+          docker container inspect
+          --format {% raw %}'{{ json .NetworkSettings.Networks }}'{% endraw %}
+          {{ npm_container_name }}
+      register: npm_networks
+      changed_when: false
+
+    - name: Attach Nginx Proxy Manager to the shared application overlay
+      ansible.builtin.command:
+        cmd: >-
+          docker network connect --alias nginx-reverse-proxy
+          homelab-proxy {{ npm_container_name }}
+      when: "'homelab-proxy' not in npm_networks.stdout"

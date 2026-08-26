@@ -39,6 +39,7 @@ services:
         start_period: 60s
       networks:
         - network
+        - proxy
       deploy:
         mode: replicated
         replicas: 1
@@ -47,6 +48,9 @@ networks:
   network:
     driver: overlay
     attachable: true
+  proxy:
+    name: homelab-proxy
+    external: true
 
 secrets:
   vault_aws_access_key_id:

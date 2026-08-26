@@ -1,10 +1,6 @@
 services:
   nginx-reverse-proxy:
       image: "docker.io/jc21/nginx-proxy-manager:2.15.1"
-      ports:
-        - 80:80
-        - 8181:81
-        - 443:443
       volumes:
         - type: bind
           source: ${DATA_DIR}
@@ -21,11 +17,18 @@ services:
         start_period: 30s
       networks:
         - network
+        - proxy
       deploy:
         mode: replicated
-        replicas: 1
+        # NPM is started by ansible/nginx-reverse-proxy-standalone.yml.
+        # Docker Engine 29.7.2 leaves stale Swarm ingress NAT rules for these
+        # ports, so this stack must not publish or run a competing replica.
+        replicas: 0
 
 networks:
   network:
     driver: overlay
     attachable: true
+  proxy:
+    name: homelab-proxy
+    external: true

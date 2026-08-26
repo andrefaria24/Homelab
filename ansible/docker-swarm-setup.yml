@@ -96,6 +96,18 @@
         cmd: docker node update --label-add pulse=true {{ ansible_hostname }}
       when: pulse_node_label.stdout != "true"
 
+    - name: Check shared reverse-proxy network
+      ansible.builtin.command:
+        cmd: docker network inspect homelab-proxy
+      register: homelab_proxy_network
+      changed_when: false
+      failed_when: false
+
+    - name: Create shared reverse-proxy network
+      ansible.builtin.command:
+        cmd: docker network create --driver overlay --attachable homelab-proxy
+      when: homelab_proxy_network.rc != 0
+
 - name: Join remaining managers to Docker Swarm
   hosts: docker_mgr_nodes:!docker_mgr_nodes[0]
   become: true

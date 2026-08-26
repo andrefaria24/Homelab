@@ -5,6 +5,7 @@
   gather_facts: true
   vars:
     docker_data_root: /var/lib/docker
+    pulse_data_dir: /var/lib/pulse/data
     docker_nfs_volume_dirs:
       - /mnt/docker-swarm/volumes
   tasks:
@@ -26,6 +27,15 @@
         state: directory
       loop: "{{ docker_nfs_volume_dirs }}"
       when: mnt_fstype | length == 0 or mnt_fstype in ['cifs', 'smbfs', 'fuse.sshfs', 'nfs', 'nfs4']
+
+    - name: Ensure Pulse local data directory exists on its designated node
+      ansible.builtin.file:
+        path: "{{ pulse_data_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      when: inventory_hostname == groups['docker_mgr_nodes'][0]
 
     - name: Set Docker data-root to local path
       ansible.builtin.copy:
@@ -71,6 +81,20 @@
       ansible.builtin.shell: docker swarm join-token worker -q
       register: worker_token
       changed_when: false
+
+    - name: Read Pulse placement label
+      ansible.builtin.command:
+        cmd: >-
+          docker node inspect
+          --format {% raw %}'{{ index .Spec.Labels "pulse" }}'{% endraw %}
+          {{ ansible_hostname }}
+      register: pulse_node_label
+      changed_when: false
+
+    - name: Label the designated Pulse node
+      ansible.builtin.command:
+        cmd: docker node update --label-add pulse=true {{ ansible_hostname }}
+      when: pulse_node_label.stdout != "true"
 
 - name: Join remaining managers to Docker Swarm
   hosts: docker_mgr_nodes:!docker_mgr_nodes[0]

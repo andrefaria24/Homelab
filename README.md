@@ -34,7 +34,9 @@ The example Ansible inventory models one Swarm manager and three workers. Actual
 
 Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other eight Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
 
-Each application stack has a health check for its primary service and uses a dedicated attachable overlay network. Persistent application data is bind-mounted from host paths supplied through Portainer variables. The Portainer agent is deployed globally and does not have an explicit Compose health check.
+Each application stack has a health check for its primary service and uses a dedicated attachable overlay network. Most persistent application data is bind-mounted from host paths supplied through Portainer variables. The Portainer agent is deployed globally and does not have an explicit Compose health check.
+
+Pulse is intentionally pinned to the Swarm node labeled `pulse=true` and stores `/data` on that node at `/var/lib/pulse/data`. Pulse uses SQLite in WAL mode, so its database must not be placed on the shared NFS filesystem. The Swarm Ansible playbook creates the local directory on the first manager and applies the placement label. Pulse also has a 768 MiB memory limit and a bounded restart policy so a monitoring failure cannot exhaust an entire 2 GiB Docker node.
 
 The Ansible storage playbook mounts the NFS export `nas.local.andrecfaria.com:/volume1/docker-swarm` at `/mnt/docker-swarm` on Docker hosts. Any bind-mounted path used by a movable Swarm service must exist consistently on every eligible node.
 

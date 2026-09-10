@@ -19,7 +19,7 @@ services:
         - CMD-SHELL
         - >-
           curl --fail --insecure --silent --show-error
-          --user "$${USERNAME}:$${PASSWORD}"
+          --user "$${CUSTOM_USER}:$${PASSWORD}"
           https://127.0.0.1:3001/ > /dev/null
       interval: 30s
       timeout: 10s

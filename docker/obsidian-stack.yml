@@ -1,0 +1,43 @@
+services:
+  obsidian:
+    image: linuxserver/obsidian:1.13.7
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: America/New_York
+      CUSTOM_USER: ${USERNAME}
+      PASSWORD: ${PASSWORD}
+    volumes:
+      - type: bind
+        source: ${DATA_DIR}
+        target: /config
+    ports:
+      - "3003:3001"
+    shm_size: "1gb"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          curl --fail --insecure --silent --show-error
+          --user "$${USERNAME}:$${PASSWORD}"
+          https://127.0.0.1:3001/ > /dev/null
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+    networks:
+      - network
+      - proxy
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+networks:
+  network:
+    driver: overlay
+    attachable: true
+  proxy:
+    name: homelab-proxy
+    external: true

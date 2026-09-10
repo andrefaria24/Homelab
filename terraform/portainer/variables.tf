@@ -96,6 +96,10 @@ variable "stack_configuration" {
         name                    = "hermes"
         file_path_in_repository = "docker/hermes-stack.yml"
       }
+      obsidian = {
+        name                    = "obsidian"
+        file_path_in_repository = "docker/obsidian-stack.yml"
+      }
     }
   }
 }

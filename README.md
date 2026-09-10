@@ -32,13 +32,15 @@ The example Ansible inventory models one Swarm manager and three workers. Actual
 
 ## Docker Swarm stacks
 
-Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other eight Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
+Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other nine Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
 
 Each application stack has a health check for its primary service and uses a dedicated attachable overlay network. Most persistent application data is bind-mounted from host paths supplied through Portainer variables. The Portainer agent is deployed globally and does not have an explicit Compose health check.
 
 Pulse is intentionally pinned to the Swarm node labeled `pulse=true` and stores `/data` on that node at `/var/lib/pulse/data`. Pulse uses SQLite in WAL mode, so its database must not be placed on the shared NFS filesystem. The Swarm Ansible playbook creates the local directory on the first manager and applies the placement label. Pulse also has a 768 MiB memory limit and a bounded restart policy so a monitoring failure cannot exhaust an entire 2 GiB Docker node.
 
-Nginx Proxy Manager, Vault, and Uptime Kuma also join the external `homelab-proxy` overlay network. Proxy hosts should use the Swarm service names `vault:8200` and `uptime-kuma:3001` as their upstreams instead of routing back through a node's published ports. The Swarm Ansible playbook creates this network before Portainer deploys the stacks.
+Nginx Proxy Manager, Obsidian, Vault, and Uptime Kuma also join the external `homelab-proxy` overlay network. Proxy hosts should use the Swarm service names `obsidian:3000`, `vault:8200`, and `uptime-kuma:3001` as their upstreams instead of routing back through a node's published ports. The Swarm Ansible playbook creates this network before Portainer deploys the stacks.
+
+Obsidian publishes its self-signed HTTPS interface on Swarm port `3003` because its native host ports conflict with ConvertX and Uptime Kuma. Its HTTP interface is available only to reverse proxies on `homelab-proxy`. Configure `DATA_DIR`, `CUSTOM_USER`, and `PASSWORD` in Portainer before enabling the stack; `PUID`, `PGID`, and `TZ` default to `1000`, `1000`, and `America/New_York`. The bind-mounted directory must be writable by the configured UID and GID.
 
 Nginx Proxy Manager itself currently runs as a restart-managed container on the first manager rather than as a Swarm task. Docker Engine 29.7.2 can leave orphaned `DOCKER-INGRESS` DNAT rules that black-hole its published ports. Run `ansible-playbook nginx-reverse-proxy-standalone.yml` after the Swarm setup; the playbook creates NPM on the local bridge first and attaches `homelab-proxy` afterward. Its Portainer stack intentionally has zero replicas and no published ports to prevent a competing ingress service.
 
@@ -149,7 +151,7 @@ terraform plan
 terraform apply
 ```
 
-The eight stacks are represented by one `for_each` resource. Shared defaults and the per-stack inventory are centralized in `variables.tf`.
+The nine stacks are represented by one `for_each` resource. Shared defaults and the per-stack inventory are centralized in `variables.tf`.
 
 Do not run `apply` against an existing Portainer installation with an empty state. Restore the secured Terraform state or import the existing environment and stacks first. Portainer stack import IDs use:
 

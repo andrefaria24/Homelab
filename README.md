@@ -32,11 +32,21 @@ The example Ansible inventory models one Swarm manager and three workers. Actual
 
 ## Docker Swarm stacks
 
-Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other nine Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
+Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other ten Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
 
 Each application stack has a health check for its primary service and uses a dedicated attachable overlay network. Most persistent application data is bind-mounted from host paths supplied through Portainer variables. The Portainer agent is deployed globally and does not have an explicit Compose health check.
 
 Pulse is intentionally pinned to the Swarm node labeled `pulse=true` and stores `/data` on that node at `/var/lib/pulse/data`. Pulse uses SQLite in WAL mode, so its database must not be placed on the shared NFS filesystem. The Swarm Ansible playbook creates the local directory on the first manager and applies the placement label. Pulse also has a 768 MiB memory limit and a bounded restart policy so a monitoring failure cannot exhaust an entire 2 GiB Docker node.
+
+Game Collection is similarly pinned to the node labeled `game_collection=true` because its SQLite database uses WAL mode. Its private database is stored at `/var/lib/game-collection/data/game-collection.db`, outside Git, and the app is published on Swarm port `3002`. It also joins `homelab-proxy`, where reverse proxies can reach it at `game-collection:3000`.
+
+Import its database from a Windows workstation before enabling the stack:
+
+```powershell
+.\scripts\Import-GameCollectionDatabase.ps1
+```
+
+The script takes a consistent SQLite backup, transfers it through Portainer to the labeled node, and removes its temporary Swarm service and config afterward. Override `-SourceDatabase` or `-TargetNode` when the defaults do not match the current environment.
 
 Nginx Proxy Manager, Obsidian, Vault, and Uptime Kuma also join the external `homelab-proxy` overlay network. Proxy hosts should use the Swarm service names `obsidian:3000`, `vault:8200`, and `uptime-kuma:3001` as their upstreams instead of routing back through a node's published ports. The Swarm Ansible playbook creates this network before Portainer deploys the stacks.
 
@@ -56,7 +66,7 @@ The Terraform stack resources share these defaults:
 - Webhooks, forced updates, forced image pulls, relative paths, and pruning disabled.
 - New stacks default to inactive.
 
-`hello-world` overrides the polling interval to `72h`. Uptime Kuma, Pulse, Vault, and Nginx Proxy Manager override the default status and are active.
+`hello-world` overrides the polling interval to `72h`. Uptime Kuma, Pulse, Vault, Nginx Proxy Manager, and Game Collection override the default status and are active.
 
 Stack environment values are intentionally managed in Portainer rather than Terraform:
 

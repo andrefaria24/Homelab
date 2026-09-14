@@ -100,6 +100,11 @@ variable "stack_configuration" {
         name                    = "obsidian"
         file_path_in_repository = "docker/obsidian-stack.yml"
       }
+      game_collection = {
+        name                    = "game-collection-stack"
+        file_path_in_repository = "docker/game-collection-stack.yml"
+        active                  = true
+      }
     }
   }
 }

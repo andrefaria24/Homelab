@@ -6,6 +6,7 @@
   vars:
     docker_data_root: /var/lib/docker
     pulse_data_dir: /var/lib/pulse/data
+    game_collection_data_dir: /var/lib/game-collection/data
     docker_nfs_volume_dirs:
       - /mnt/docker-swarm/volumes
   tasks:
@@ -34,6 +35,15 @@
         state: directory
         owner: root
         group: root
+        mode: "0755"
+      when: inventory_hostname == groups['docker_mgr_nodes'][0]
+
+    - name: Ensure game collection local data directory exists on its designated node
+      ansible.builtin.file:
+        path: "{{ game_collection_data_dir }}"
+        state: directory
+        owner: "1000"
+        group: "1000"
         mode: "0755"
       when: inventory_hostname == groups['docker_mgr_nodes'][0]
 
@@ -95,6 +105,20 @@
       ansible.builtin.command:
         cmd: docker node update --label-add pulse=true {{ ansible_hostname }}
       when: pulse_node_label.stdout != "true"
+
+    - name: Read game collection placement label
+      ansible.builtin.command:
+        cmd: >-
+          docker node inspect
+          --format {% raw %}'{{ index .Spec.Labels "game_collection" }}'{% endraw %}
+          {{ ansible_hostname }}
+      register: game_collection_node_label
+      changed_when: false
+
+    - name: Label the designated game collection node
+      ansible.builtin.command:
+        cmd: docker node update --label-add game_collection=true {{ ansible_hostname }}
+      when: game_collection_node_label.stdout != "true"
 
     - name: Check shared reverse-proxy network
       ansible.builtin.command:

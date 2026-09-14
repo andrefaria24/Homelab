@@ -5,6 +5,11 @@ services:
       - "3002:3000"
     environment:
       DATABASE_PATH: /app/data/game-collection.db
+      NEXTAUTH_URL: ${NEXTAUTH_URL:?NEXTAUTH_URL must be configured in Portainer}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET must be configured in Portainer}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID must be configured in Portainer}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?GOOGLE_CLIENT_SECRET must be configured in Portainer}
+      INITIAL_ADMIN_EMAILS: ${INITIAL_ADMIN_EMAILS:?INITIAL_ADMIN_EMAILS must be configured in Portainer}
     volumes:
       - type: bind
         source: /var/lib/game-collection/data

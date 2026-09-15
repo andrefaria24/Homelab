@@ -105,6 +105,11 @@ variable "stack_configuration" {
         file_path_in_repository = "docker/game-collection-stack.yml"
         active                  = true
       }
+      nine_router = {
+        name                    = "9router"
+        file_path_in_repository = "docker/9router-stack.yml"
+        active                  = true
+      }
     }
   }
 }

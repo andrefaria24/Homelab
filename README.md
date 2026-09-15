@@ -32,7 +32,7 @@ The example Ansible inventory models one Swarm manager and three workers. Actual
 
 ## Docker Swarm stacks
 
-Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other ten Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
+Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other eleven Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
 
 Each application stack has a health check for its primary service and uses a dedicated attachable overlay network. Most persistent application data is bind-mounted from host paths supplied through Portainer variables. The Portainer agent is deployed globally and does not have an explicit Compose health check.
 
@@ -47,6 +47,10 @@ Import its database from a Windows workstation before enabling the stack:
 ```
 
 The script takes a consistent SQLite backup, transfers it through Portainer to the labeled node, and removes its temporary Swarm service and config afterward. Override `-SourceDatabase` or `-TargetNode` when the defaults do not match the current environment.
+
+9Router is pinned to the node labeled `nine_router=true` because its SQLite database also uses WAL mode. Its data is stored at `/var/lib/9router/data`, and the dashboard and OpenAI-compatible API are published on Swarm port `20128`. Reverse proxies on `homelab-proxy` can reach it at `9router:20128`; the optional Headroom token-optimization sidecar is available only on the stack's private overlay network at `headroom:8787`.
+
+Before enabling 9Router, configure `JWT_SECRET`, `INITIAL_PASSWORD`, `API_KEY_SECRET`, `MACHINE_ID_SALT`, `BASE_URL`, and `AUTH_COOKIE_SECURE` in Portainer. Use long random values for the four secrets, set `BASE_URL` to the URL clients use to reach the instance, and set `AUTH_COOKIE_SECURE` to `true` when the dashboard is served exclusively over HTTPS.
 
 Nginx Proxy Manager, Obsidian, Vault, and Uptime Kuma also join the external `homelab-proxy` overlay network. Proxy hosts should use the Swarm service names `obsidian:3000`, `vault:8200`, and `uptime-kuma:3001` as their upstreams instead of routing back through a node's published ports. The Swarm Ansible playbook creates this network before Portainer deploys the stacks.
 
@@ -66,7 +70,7 @@ The Terraform stack resources share these defaults:
 - Webhooks, forced updates, forced image pulls, relative paths, and pruning disabled.
 - New stacks default to inactive.
 
-`hello-world` overrides the polling interval to `72h`. Uptime Kuma, Pulse, Vault, Nginx Proxy Manager, and Game Collection override the default status and are active.
+`hello-world` overrides the polling interval to `72h`. Uptime Kuma, Pulse, Vault, Nginx Proxy Manager, Game Collection, and 9Router override the default status and are active.
 
 Stack environment values are intentionally managed in Portainer rather than Terraform:
 

@@ -1,0 +1,68 @@
+services:
+  9router:
+    image: decolua/9router:0.5.75
+    ports:
+      - "20128:20128"
+    environment:
+      DATA_DIR: /app/data
+      PORT: "20128"
+      HOSTNAME: 0.0.0.0
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+      INITIAL_PASSWORD: ${INITIAL_PASSWORD}
+      API_KEY_SECRET: ${API_KEY_SECRET}
+      MACHINE_ID_SALT: ${MACHINE_ID_SALT}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE}
+      BASE_URL: ${BASE_URL}
+      NEXT_PUBLIC_BASE_URL: ${BASE_URL}
+      CLOUD_URL: https://9router.com
+      HEADROOM_URL: http://headroom:8787
+    volumes:
+      - type: bind
+        source: /var/lib/9router/data
+        target: /app/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:20128/api/health')
+          .then(response => { if (!response.ok) process.exit(1) })
+          .catch(() => process.exit(1))
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - network
+      - proxy
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.nine_router == true
+
+  headroom:
+    image: ghcr.io/chopratejas/headroom:latest
+    networks:
+      - network
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.nine_router == true
+
+networks:
+  network:
+    driver: overlay
+    attachable: true
+  proxy:
+    name: homelab-proxy
+    external: true

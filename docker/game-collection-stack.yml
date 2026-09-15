@@ -1,6 +1,6 @@
 services:
   game-collection:
-    image: faria135/faria-game-collection:0.3.0
+    image: faria135/faria-game-collection:0.4.0
     ports:
       - "3002:3000"
     environment:
@@ -20,7 +20,7 @@ services:
         - node
         - -e
         - >-
-          fetch('http://127.0.0.1:3000/api/collection')
+          fetch('http://127.0.0.1:3000/api/health')
           .then(response => { if (!response.ok) process.exit(1) })
           .catch(() => process.exit(1))
       interval: 30s

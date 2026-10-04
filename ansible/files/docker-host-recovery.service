@@ -1,0 +1,10 @@
+[Unit]
+Description=Retry Docker storage and standalone proxy startup after an outage
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=!/run/docker-host-recovery.disabled
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/docker-host-recovery
+TimeoutStartSec=180s

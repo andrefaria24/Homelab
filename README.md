@@ -60,6 +60,50 @@ Nginx Proxy Manager itself currently runs as a restart-managed container on the 
 
 The Ansible storage playbook mounts the NFS export `nas.local.andrecfaria.com:/volume1/docker-swarm` at `/mnt/docker-swarm` on Docker hosts. Any bind-mounted path used by a movable Swarm service must exist consistently on every eligible node.
 
+### Recovery after a power outage
+
+The current cluster uses three managers (`docker-1`, `docker-2`, and `docker-3`).
+At least two must be online and able to communicate before Swarm can elect a
+leader and schedule services. One manager returning alone cannot recover quorum
+automatically. Do not automate `docker swarm init --force-new-cluster`: it is a
+manual disaster-recovery action after verifying the other managers cannot return.
+
+Apply the startup hardening to all Docker hosts after mounting shared storage:
+
+```bash
+cd ansible
+ansible-playbook -i hosts docker-outage-recovery.yml
+```
+
+This playbook leaves running containers in place and installs:
+
+- A Docker systemd dependency on `/mnt/docker-swarm`, with a check that it is an
+  NFS mount rather than an empty directory on the local disk.
+- A 30-second NFS mount-attempt timeout. The host can finish booting if the NAS is
+  unavailable; Docker waits for its required storage.
+- `docker-host-recovery.timer`, which retries failed Docker startup every 30
+  seconds after the previous attempt completes. It also starts the existing
+  standalone reverse proxy once Swarm quorum is available if its initial network
+  attachment failed. It never changes cluster membership or recreates containers.
+
+For intentional Docker or proxy maintenance, suspend recovery first with
+`sudo systemctl stop docker-host-recovery.timer docker-host-recovery.service`.
+Resume it with `sudo systemctl start docker-host-recovery.timer`. Alternatively,
+create `/run/docker-host-recovery.disabled` to inhibit recovery until that file is
+removed or the host reboots.
+
+Check recovery with `systemctl status docker-host-recovery.timer`,
+`journalctl -u docker-host-recovery.service`, and `docker node ls`.
+The playbook does not unmount live storage or restart Docker to apply the boot
+settings. A controlled reboot of one manager can verify them while the other two
+maintain quorum.
+
+Outside Docker, configure Proxmox to start all manager VMs after power returns,
+bring up the NAS and network before the Docker hosts, and keep manager IP addresses
+stable with DHCP reservations or static addressing. A UPS and orderly shutdown
+reduce the risk of filesystem and application data corruption. Swarm cannot
+power on a stopped VM or provide quorum with only one of three managers online.
+
 ### Portainer deployment behavior
 
 The Terraform stack resources share these defaults:

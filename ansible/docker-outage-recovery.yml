@@ -1,0 +1,73 @@
+---
+- name: Make Docker startup recover from delayed storage and Swarm quorum
+  hosts: docker
+  become: true
+  serial: 1
+  vars:
+    nfs_export: nas.local.andrecfaria.com:/volume1/docker-swarm
+    mount_point: /mnt/docker-swarm
+  tasks:
+    - name: Confirm shared storage is already mounted before changing boot configuration
+      ansible.builtin.command:
+        argv: [findmnt, --noheadings, --types, 'nfs,nfs4', --mountpoint, '{{ mount_point }}']
+      changed_when: false
+
+    - name: Bound NFS boot attempts and keep the host reachable while the NAS is offline
+      ansible.posix.mount:
+        src: '{{ nfs_export }}'
+        path: '{{ mount_point }}'
+        fstype: nfs
+        opts: defaults,_netdev,nofail,x-systemd.mount-timeout=30s
+        state: present
+        backup: true
+
+    - name: Create Docker systemd override directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+        mode: '0755'
+
+    - name: Require shared storage before Docker starts containers
+      ansible.builtin.copy:
+        src: docker-boot-dependencies.conf
+        dest: /etc/systemd/system/docker.service.d/10-homelab-storage.conf
+        mode: '0644'
+
+    - name: Install the bounded recovery helper
+      ansible.builtin.copy:
+        src: docker-host-recovery.sh
+        dest: /usr/local/sbin/docker-host-recovery
+        mode: '0755'
+        validate: /bin/sh -n %s
+
+    - name: Install recovery service and timer
+      ansible.builtin.copy:
+        src: '{{ item }}'
+        dest: '/etc/systemd/system/{{ item }}'
+        mode: '0644'
+      loop:
+        - docker-host-recovery.service
+        - docker-host-recovery.timer
+
+    - name: Reload boot configuration without restarting running containers
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
+    - name: Enable Docker and containerd at boot
+      ansible.builtin.systemd_service:
+        name: '{{ item }}'
+        enabled: true
+      loop:
+        - docker.service
+        - containerd.service
+
+    - name: Enable recurring startup recovery
+      ansible.builtin.systemd_service:
+        name: docker-host-recovery.timer
+        enabled: true
+        state: started
+
+    - name: Check the recovery helper against the running host
+      ansible.builtin.systemd_service:
+        name: docker-host-recovery.service
+        state: started

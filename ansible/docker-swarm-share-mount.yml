@@ -26,5 +26,5 @@
         src: "{{ nfs_export }}"
         path: "{{ mount_point }}"
         fstype: nfs
-        opts: "defaults,nofail"
+        opts: "defaults,_netdev,nofail,x-systemd.mount-timeout=30s"
         state: mounted

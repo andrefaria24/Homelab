@@ -1,0 +1,11 @@
+[Unit]
+Description=Retry Docker host recovery until boot dependencies are available
+
+[Timer]
+OnBootSec=30s
+OnUnitInactiveSec=30s
+AccuracySec=5s
+Unit=docker-host-recovery.service
+
+[Install]
+WantedBy=timers.target

@@ -4,7 +4,7 @@ services:
     environment:
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?Configure LITELLM_MASTER_KEY in Portainer}
       LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:?Configure LITELLM_SALT_KEY in Portainer}
-      DATABASE_URL: postgresql://litellm:${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD in Portainer}@db:5432/litellm
+      DATABASE_URL: ${DATABASE_URL:?Configure DATABASE_URL in Portainer}
       STORE_MODEL_IN_DB: "True"
     ports:
       - "4000:4000"

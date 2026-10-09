@@ -9,6 +9,7 @@
     game_collection_data_dir: /var/lib/game-collection/data
     nine_router_data_dir: /var/lib/9router/data
     litellm_postgres_data_dir: /var/lib/litellm/postgres
+    litellm_redis_data_dir: /var/lib/litellm/redis
     docker_nfs_volume_dirs:
       - /mnt/docker-swarm/volumes
   tasks:
@@ -61,6 +62,15 @@
     - name: Ensure LiteLLM PostgreSQL data directory exists on its designated node
       ansible.builtin.file:
         path: "{{ litellm_postgres_data_dir }}"
+        state: directory
+        owner: "999"
+        group: "999"
+        mode: "0700"
+      when: inventory_hostname == groups['docker_mgr_nodes'][0]
+
+    - name: Ensure LiteLLM Redis data directory exists on its designated node
+      ansible.builtin.file:
+        path: "{{ litellm_redis_data_dir }}"
         state: directory
         owner: "999"
         group: "999"

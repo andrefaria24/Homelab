@@ -1,11 +1,19 @@
 services:
   litellm:
     image: docker.litellm.ai/berriai/litellm:v1.98.0
+    command:
+      - --config=/app/config.yaml
     environment:
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?Configure LITELLM_MASTER_KEY in Portainer}
       LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:?Configure LITELLM_SALT_KEY in Portainer}
       DATABASE_URL: ${DATABASE_URL:?Configure DATABASE_URL in Portainer}
       STORE_MODEL_IN_DB: "True"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Configure REDIS_PASSWORD in Portainer}
+    configs:
+      - source: litellm_config_v1
+        target: /app/config.yaml
     ports:
       - "4000:4000"
     healthcheck:
@@ -23,6 +31,35 @@ services:
     networks:
       - network
       - proxy
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.litellm == true
+
+  redis:
+    image: redis:7.4.7-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Configure REDIS_PASSWORD in Portainer}
+    command:
+      - /bin/sh
+      - -c
+      - exec redis-server --appendonly yes --requirepass "$${REDIS_PASSWORD}"
+    volumes:
+      - type: bind
+        source: /var/lib/litellm/redis
+        target: /data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - network
     deploy:
       mode: replicated
       replicas: 1
@@ -66,3 +103,7 @@ networks:
   proxy:
     name: homelab-proxy
     external: true
+
+configs:
+  litellm_config_v1:
+    file: ./litellm-config.yaml

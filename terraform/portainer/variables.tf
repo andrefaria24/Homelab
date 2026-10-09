@@ -110,6 +110,10 @@ variable "stack_configuration" {
         file_path_in_repository = "docker/9router-stack.yml"
         active                  = true
       }
+      litellm = {
+        name                    = "litellm"
+        file_path_in_repository = "docker/litellm-stack.yml"
+      }
     }
   }
 }

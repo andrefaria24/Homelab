@@ -8,6 +8,7 @@
     pulse_data_dir: /var/lib/pulse/data
     game_collection_data_dir: /var/lib/game-collection/data
     nine_router_data_dir: /var/lib/9router/data
+    litellm_postgres_data_dir: /var/lib/litellm/postgres
     docker_nfs_volume_dirs:
       - /mnt/docker-swarm/volumes
   tasks:
@@ -55,6 +56,15 @@
         owner: "1000"
         group: "1000"
         mode: "0755"
+      when: inventory_hostname == groups['docker_mgr_nodes'][0]
+
+    - name: Ensure LiteLLM PostgreSQL data directory exists on its designated node
+      ansible.builtin.file:
+        path: "{{ litellm_postgres_data_dir }}"
+        state: directory
+        owner: "999"
+        group: "999"
+        mode: "0700"
       when: inventory_hostname == groups['docker_mgr_nodes'][0]
 
     - name: Set Docker data-root to local path
@@ -143,6 +153,20 @@
       ansible.builtin.command:
         cmd: docker node update --label-add nine_router=true {{ ansible_hostname }}
       when: nine_router_node_label.stdout != "true"
+
+    - name: Read LiteLLM placement label
+      ansible.builtin.command:
+        cmd: >-
+          docker node inspect
+          --format {% raw %}'{{ index .Spec.Labels "litellm" }}'{% endraw %}
+          {{ ansible_hostname }}
+      register: litellm_node_label
+      changed_when: false
+
+    - name: Label the designated LiteLLM node
+      ansible.builtin.command:
+        cmd: docker node update --label-add litellm=true {{ ansible_hostname }}
+      when: litellm_node_label.stdout != "true"
 
     - name: Check shared reverse-proxy network
       ansible.builtin.command:

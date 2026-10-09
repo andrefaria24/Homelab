@@ -32,7 +32,7 @@ The example Ansible inventory models one Swarm manager and three workers. Actual
 
 ## Docker Swarm stacks
 
-Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other eleven Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
+Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other twelve Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
 
 Each application stack has a health check for its primary service and uses a dedicated attachable overlay network. Most persistent application data is bind-mounted from host paths supplied through Portainer variables. The Portainer agent is deployed globally and does not have an explicit Compose health check.
 
@@ -52,7 +52,11 @@ The script takes a consistent SQLite backup, transfers it through Portainer to t
 
 Before enabling 9Router, configure `JWT_SECRET`, `INITIAL_PASSWORD`, `API_KEY_SECRET`, `MACHINE_ID_SALT`, `BASE_URL`, and `AUTH_COOKIE_SECURE` in Portainer. Use long random values for the four secrets, set `BASE_URL` to the URL clients use to reach the instance, and set `AUTH_COOKIE_SECURE` to `true` when the dashboard is served exclusively over HTTPS.
 
-Nginx Proxy Manager, Obsidian, Vault, and Uptime Kuma also join the external `homelab-proxy` overlay network. Proxy hosts should use the Swarm service names `obsidian:3000`, `vault:8200`, and `uptime-kuma:3001` as their upstreams instead of routing back through a node's published ports. The Swarm Ansible playbook creates this network before Portainer deploys the stacks.
+LiteLLM runs with PostgreSQL so the Admin UI, virtual keys, model configuration, and spend tracking persist. Both services are pinned to the node labeled `litellm=true`; PostgreSQL data is stored locally at `/var/lib/litellm/postgres`. The gateway is published on Swarm port `4000` and reverse proxies on `homelab-proxy` can reach it at `litellm:4000`.
+
+Before enabling LiteLLM, configure `LITELLM_MASTER_KEY`, `LITELLM_SALT_KEY`, and `POSTGRES_PASSWORD` in Portainer. Generate long random values, prefix the two LiteLLM keys with `sk-`, and use an unreserved hexadecimal password so it remains safe inside `DATABASE_URL`. Preserve `LITELLM_SALT_KEY`: changing it makes provider credentials already stored in the database unreadable. The stack is inactive by default; run `ansible-playbook docker-swarm-setup.yml` first to create the local database directory and placement label.
+
+Nginx Proxy Manager, LiteLLM, Obsidian, Vault, and Uptime Kuma also join the external `homelab-proxy` overlay network. Proxy hosts should use the Swarm service names `litellm:4000`, `obsidian:3000`, `vault:8200`, and `uptime-kuma:3001` as their upstreams instead of routing back through a node's published ports. The Swarm Ansible playbook creates this network before Portainer deploys the stacks.
 
 Obsidian publishes its self-signed HTTPS interface on Swarm port `3003` because its native host ports conflict with ConvertX and Uptime Kuma. Its HTTP interface is available only to reverse proxies on `homelab-proxy`. Configure `DATA_DIR`, `CUSTOM_USER`, and `PASSWORD` in Portainer before enabling the stack; `PUID`, `PGID`, and `TZ` default to `1000`, `1000`, and `America/New_York`. The bind-mounted directory must be writable by the configured UID and GID.
 
@@ -209,7 +213,7 @@ terraform plan
 terraform apply
 ```
 
-The nine stacks are represented by one `for_each` resource. Shared defaults and the per-stack inventory are centralized in `variables.tf`.
+The twelve Git-backed stacks are represented by one `for_each` resource. Shared defaults and the per-stack inventory are centralized in `variables.tf`.
 
 Do not run `apply` against an existing Portainer installation with an empty state. Restore the secured Terraform state or import the existing environment and stacks first. Portainer stack import IDs use:
 

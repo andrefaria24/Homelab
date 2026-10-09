@@ -8,7 +8,7 @@ services:
       LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:?Configure LITELLM_SALT_KEY in Portainer}
       DATABASE_URL: ${DATABASE_URL:?Configure DATABASE_URL in Portainer}
       STORE_MODEL_IN_DB: "True"
-      REDIS_HOST: redis
+      REDIS_HOST: litellm_redis
       REDIS_PORT: "6379"
       REDIS_PASSWORD: ${REDIS_PASSWORD:?Configure REDIS_PASSWORD in Portainer}
     configs:

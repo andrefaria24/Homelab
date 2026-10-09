@@ -48,17 +48,11 @@ Import its database from a Windows workstation before enabling the stack:
 
 The script takes a consistent SQLite backup, transfers it through Portainer to the labeled node, and removes its temporary Swarm service and config afterward. Override `-SourceDatabase` or `-TargetNode` when the defaults do not match the current environment.
 
-9Router is pinned to the node labeled `nine_router=true` because its SQLite database also uses WAL mode. Its data is stored at `/var/lib/9router/data`, and the dashboard and OpenAI-compatible API are published on Swarm port `20128`. Reverse proxies on `homelab-proxy` can reach it at `9router:20128`; the optional Headroom token-optimization sidecar is available only on the stack's private overlay network at `headroom:8787`.
-
-Before enabling 9Router, configure `JWT_SECRET`, `INITIAL_PASSWORD`, `API_KEY_SECRET`, `MACHINE_ID_SALT`, `BASE_URL`, and `AUTH_COOKIE_SECURE` in Portainer. Use long random values for the four secrets, set `BASE_URL` to the URL clients use to reach the instance, and set `AUTH_COOKIE_SECURE` to `true` when the dashboard is served exclusively over HTTPS.
-
 LiteLLM runs with PostgreSQL so the Admin UI, virtual keys, model configuration, and spend tracking persist. Both services are pinned to the node labeled `litellm=true`; PostgreSQL data is stored locally at `/var/lib/litellm/postgres`. The gateway is published on Swarm port `4000` and reverse proxies on `homelab-proxy` can reach it at `litellm:4000`.
 
 Before enabling LiteLLM, configure `LITELLM_MASTER_KEY`, `LITELLM_SALT_KEY`, and `POSTGRES_PASSWORD` in Portainer. Generate long random values, prefix the two LiteLLM keys with `sk-`, and use an unreserved hexadecimal password so it remains safe inside `DATABASE_URL`. Preserve `LITELLM_SALT_KEY`: changing it makes provider credentials already stored in the database unreadable. The stack is inactive by default; run `ansible-playbook docker-swarm-setup.yml` first to create the local database directory and placement label.
 
-Nginx Proxy Manager, LiteLLM, Obsidian, Vault, and Uptime Kuma also join the external `homelab-proxy` overlay network. Proxy hosts should use the Swarm service names `litellm:4000`, `obsidian:3000`, `vault:8200`, and `uptime-kuma:3001` as their upstreams instead of routing back through a node's published ports. The Swarm Ansible playbook creates this network before Portainer deploys the stacks.
-
-Obsidian publishes its self-signed HTTPS interface on Swarm port `3003` because its native host ports conflict with ConvertX and Uptime Kuma. Its HTTP interface is available only to reverse proxies on `homelab-proxy`. Configure `DATA_DIR`, `CUSTOM_USER`, and `PASSWORD` in Portainer before enabling the stack; `PUID`, `PGID`, and `TZ` default to `1000`, `1000`, and `America/New_York`. The bind-mounted directory must be writable by the configured UID and GID.
+Nginx Proxy Manager, LiteLLM, Vault, and Uptime Kuma also join the external `homelab-proxy` overlay network. Proxy hosts should use the Swarm service names `litellm:4000`, `vault:8200`, and `uptime-kuma:3001` as their upstreams instead of routing back through a node's published ports. The Swarm Ansible playbook creates this network before Portainer deploys the stacks.
 
 Nginx Proxy Manager itself currently runs as a restart-managed container on the first manager rather than as a Swarm task. Docker Engine 29.7.2 can leave orphaned `DOCKER-INGRESS` DNAT rules that black-hole its published ports. Run `ansible-playbook nginx-reverse-proxy-standalone.yml` after the Swarm setup; the playbook creates NPM on the local bridge first and attaches `homelab-proxy` afterward. Its Portainer stack intentionally has zero replicas and no published ports to prevent a competing ingress service.
 
@@ -118,7 +112,7 @@ The Terraform stack resources share these defaults:
 - Webhooks, forced updates, forced image pulls, relative paths, and pruning disabled.
 - New stacks default to inactive.
 
-`hello-world` overrides the polling interval to `72h`. Uptime Kuma, Pulse, Vault, Nginx Proxy Manager, Game Collection, and 9Router override the default status and are active.
+`hello-world` overrides the polling interval to `72h`. Uptime Kuma, Pulse, Vault, Nginx Proxy Manager, and Game Collection override the default status and are active.
 
 Stack environment values are intentionally managed in Portainer rather than Terraform:
 

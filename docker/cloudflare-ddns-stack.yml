@@ -8,7 +8,7 @@ services:
       - CLOUDFLARE_API_TOKEN_FILE=/run/secrets/cloudflare_api_token
       - DOMAINS=games.andrecfaria.com
       - IP6_PROVIDER=none
-      - UPDATE_CRON=*/5 * * * *
+      - UPDATE_CRON=0 */12 * * *
       - PROXIED=false
     secrets:
       - cloudflare_api_token

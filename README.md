@@ -32,9 +32,9 @@ The example Ansible inventory models one Swarm manager and three workers. Actual
 
 ## Docker Swarm stacks
 
-Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other twelve Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
+Portainer itself is bootstrapped from `docker/portainer-stack.yml`. Terraform then manages the Portainer environment and the other Git-backed stacks. The status below is the desired `active` setting in Terraform, not a real-time health report.
 
-Each application stack has a health check for its primary service and uses a dedicated attachable overlay network. Most persistent application data is bind-mounted from host paths supplied through Portainer variables. The Portainer agent is deployed globally and does not have an explicit Compose health check.
+Each application stack has a health check for its primary service and uses a dedicated attachable overlay network. The Cloudflare DDNS updater is the exception: its image exposes no local endpoint to probe, so verify it through the container logs. Most persistent application data is bind-mounted from host paths supplied through Portainer variables. The Portainer agent is deployed globally and does not have an explicit Compose health check.
 
 Pulse is intentionally pinned to the Swarm node labeled `pulse=true` and stores `/data` on that node at `/var/lib/pulse/data`. Pulse uses SQLite in WAL mode, so its database must not be placed on the shared NFS filesystem. The Swarm Ansible playbook creates the local directory on the first manager and applies the placement label. Pulse also has a 768 MiB memory limit and a bounded restart policy so a monitoring failure cannot exhaust an entire 2 GiB Docker node.
 
@@ -57,6 +57,32 @@ Nginx Proxy Manager, LiteLLM, Vault, and Uptime Kuma also join the external `hom
 Nginx Proxy Manager itself currently runs as a restart-managed container on the first manager rather than as a Swarm task. Docker Engine 29.7.2 can leave orphaned `DOCKER-INGRESS` DNAT rules that black-hole its published ports. Run `ansible-playbook nginx-reverse-proxy-standalone.yml` after the Swarm setup; the playbook creates NPM on the local bridge first and attaches `homelab-proxy` afterward. Its Portainer stack intentionally has zero replicas and no published ports to prevent a competing ingress service.
 
 The Ansible storage playbook mounts the NFS export `nas.local.andrecfaria.com:/volume1/docker-swarm` at `/mnt/docker-swarm` on Docker hosts. Any bind-mounted path used by a movable Swarm service must exist consistently on every eligible node.
+
+### Dynamic DNS for the public portal
+
+`games.andrecfaria.com` points at the home WAN address, which can change. The `cloudflare-ddns` stack (`docker/cloudflare-ddns-stack.yml`) keeps the Cloudflare `A` record aligned with the current public IPv4 address. It checks every five minutes, manages only `games.andrecfaria.com`, and preserves the existing record's proxy status and TTL. IPv6 is disabled because the Swarm service does not use host networking, and `no-new-privileges` is intentionally omitted because that option has known failures under Proxmox/QEMU virtualization.
+
+The Cloudflare API token is stored as the Portainer-managed Docker secret `cloudflare_api_token`. Terraform creates the secret through Portainer and the stack references it as an external secret. The token is read from 1Password at apply time and passed through a write-only argument, so it is not persisted in Terraform state.
+
+Create `terraform/portainer/.env` with a 1Password reference instead of the token. The file is ignored by Git:
+
+```text
+TF_VAR_cloudflare_api_token=op://Cloudflare/<item>/<field>
+```
+
+Then run Terraform through the 1Password CLI so the reference is resolved in memory:
+
+```bash
+cd terraform/portainer
+op run --env-file=.env -- terraform plan
+op run --env-file=.env -- terraform apply
+```
+
+The token needs **Zone → DNS → Edit** and **Zone → Zone → Read** for the `andrecfaria.com` zone. Docker secrets are immutable, so Terraform replaces the secret when `cloudflare_api_token_version` changes; increment that value in `terraform.auto.tfvars` or with `-var` to rotate the token.
+
+If the `A` record has to be recreated, `PROXIED=false` creates a DNS-only record. Change it to `PROXIED=true` if the orange-cloud proxy should be the fallback instead. Existing records keep their current setting.
+
+DDNS only updates DNS. The router must still forward the web ports to the Nginx Proxy Manager host. Confirm the WAN address is a real public address and not carrier-grade NAT (`100.64.0.0/10`); DDNS cannot make an inbound connection work behind CGNAT, in which case use a Cloudflare Tunnel.
 
 ### Recovery after a power outage
 
@@ -112,7 +138,7 @@ The Terraform stack resources share these defaults:
 - Webhooks, forced updates, forced image pulls, relative paths, and pruning disabled.
 - New stacks default to inactive.
 
-`hello-world` overrides the polling interval to `72h`. Uptime Kuma, Pulse, Vault, Nginx Proxy Manager, and Game Collection override the default status and are active.
+`hello-world` overrides the polling interval to `72h`. Uptime Kuma, Pulse, Vault, Nginx Proxy Manager, Game Collection, and Cloudflare DDNS override the default status and are active.
 
 Stack environment values are intentionally managed in Portainer rather than Terraform:
 
@@ -188,7 +214,7 @@ Portainer connects to the global agent service at `tasks.agent:9001`. Agent cert
 
 ### 4. Manage Portainer with Terraform
 
-The Portainer configuration requires Terraform `>= 1.10.0` and provider `portainer/portainer` `1.34.3`.
+The Portainer configuration requires Terraform `>= 1.11.0` and provider `portainer/portainer` `1.34.3`.
 
 Create `terraform/portainer/terraform.auto.tfvars` locally:
 
@@ -246,4 +272,4 @@ The repository intentionally ignores:
 - Docker `.env` files.
 - Certificates.
 
-Never commit API keys, Vault tokens, passwords, Docker secret contents, certificates, or Terraform state. For shared use, store Terraform state in an encrypted remote backend with locking and tightly controlled access.
+Never commit API keys, Vault tokens, passwords, Docker secret contents, certificates, or Terraform state. The Cloudflare DDNS token stays in 1Password and is referenced from the ignored `terraform/portainer/.env`; Terraform receives it as an ephemeral value and does not store it in state. For shared use, store Terraform state in an encrypted remote backend with locking and tightly controlled access.

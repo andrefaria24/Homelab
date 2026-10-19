@@ -43,8 +43,27 @@ resource "portainer_stack" "stacks" {
   prune           = each.value.prune
   active          = each.value.active
 
+  # The Git-backed stacks reference their Docker secrets at deploy time, so the
+  # secret must exist before Portainer starts the services.
+  depends_on = [portainer_docker_secret.cloudflare_ddns]
+
   lifecycle {
     ignore_changes = [env]
+  }
+}
+
+resource "portainer_docker_secret" "cloudflare_ddns" {
+  endpoint_id = portainer_environment.docker.id
+  name        = "cloudflare_api_token"
+
+  # The write-only argument keeps the token out of Terraform state. 1Password
+  # injects it through the ephemeral variable when Terraform runs under
+  # `op run --env-file=.env`.
+  data_wo         = base64encode(var.cloudflare_api_token)
+  data_wo_version = var.cloudflare_api_token_version
+
+  labels = {
+    managed-by = "terraform"
   }
 }
 

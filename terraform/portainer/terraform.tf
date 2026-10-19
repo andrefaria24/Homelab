@@ -1,5 +1,6 @@
 terraform {
-  required_version = ">= 1.10.0"
+  # Write-only resource arguments (data_wo) require Terraform 1.11 or later.
+  required_version = ">= 1.11.0"
 
   required_providers {
     portainer = {

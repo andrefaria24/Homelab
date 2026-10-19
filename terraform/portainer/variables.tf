@@ -13,6 +13,19 @@ variable "repo_url" {
   type        = string
 }
 
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token used by the cloudflare-ddns stack. Supply it from 1Password with `op run --env-file=.env -- terraform apply`."
+  type        = string
+  sensitive   = true
+  ephemeral   = true
+}
+
+variable "cloudflare_api_token_version" {
+  description = "Increment to rotate the cloudflare_api_token Docker secret"
+  type        = number
+  default     = 1
+}
+
 variable "stack_configuration" {
   description = "Shared Portainer stack defaults and per-stack overrides"
 
@@ -104,6 +117,11 @@ variable "stack_configuration" {
       litellm = {
         name                    = "litellm"
         file_path_in_repository = "docker/litellm-stack.yml"
+      }
+      cloudflare_ddns = {
+        name                    = "cloudflare-ddns"
+        file_path_in_repository = "docker/cloudflare-ddns-stack.yml"
+        active                  = true
       }
     }
   }

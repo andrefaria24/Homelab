@@ -12,7 +12,7 @@ services:
       REDIS_PORT: "6379"
       REDIS_PASSWORD: ${REDIS_PASSWORD:?Configure REDIS_PASSWORD in Portainer}
     configs:
-      - source: litellm_config_v1
+      - source: litellm_config_v2
         target: /app/config.yaml
     ports:
       - "4000:4000"
@@ -105,5 +105,5 @@ networks:
     external: true
 
 configs:
-  litellm_config_v1:
+  litellm_config_v2:
     file: ./litellm-config.yaml

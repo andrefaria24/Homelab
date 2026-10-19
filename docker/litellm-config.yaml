@@ -2,8 +2,35 @@ router_settings:
   redis_host: os.environ/REDIS_HOST
   redis_port: os.environ/REDIS_PORT
   redis_password: os.environ/REDIS_PASSWORD
+  # Retry the selected deployment before giving up on the model group.
+  num_retries: 2
+  # Cool down deployments quickly when they fail (including quota 429s).
+  allowed_fails: 2
+  allowed_fails_policy:
+    RateLimitErrorAllowedFails: 1
+  cooldown_time: 60
+  retry_policy:
+    # A quota 429 should move on to the configured fallback chain immediately;
+    # provider Retry-After values can otherwise make retries impractically long.
+    RateLimitErrorRetries: 0
+    DefaultRetries: 2
+  # Skip deployments whose context window cannot fit the request, instead of
+  # letting the provider reject it.
+  enable_pre_call_checks: true
+  timeout: 600
 
 litellm_settings:
+  # Drop request parameters the target model does not accept instead of failing
+  # with UnsupportedParamsError. Without this, fallback deployments reject the
+  # request outright (for example `top_p` on gpt-6-astra, or `logprobs` and
+  # `top_p` on gpt-5.5 and gpt-6-sol when reasoning_effort is unset).
+  drop_params: true
+  # Let LiteLLM repair provider-incompatible parameters. This also covers the
+  # thinking/reasoning case: when an OpenAI-compatible client does not resend
+  # the previous assistant message's reasoning content, LiteLLM drops the
+  # `thinking` parameter for that turn instead of returning
+  # "The reasoning_content in the thinking mode must be passed back to the API".
+  modify_params: true
   cache: true
   cache_params:
     type: redis

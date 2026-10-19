@@ -28,3 +28,7 @@ unattend.pkrtpl
 
 # Certificates
 **/certs/*
+
+# Agents
+AGENTS.md
+CLAUDE.md

@@ -6,7 +6,11 @@ services:
       - ALL
     environment:
       - CLOUDFLARE_API_TOKEN_FILE=/run/secrets/cloudflare_api_token
-      - DOMAINS=games.andrecfaria.com
+      # The apex holds the A record with the public IP; games.andrecfaria.com
+      # and faria-plex.andrecfaria.com are CNAMEs pointing at it, so updating
+      # the apex keeps every hostname current. DDNS cannot create an A record
+      # for a name that already has a CNAME.
+      - DOMAINS=andrecfaria.com
       - IP6_PROVIDER=none
       - UPDATE_CRON=0 */12 * * *
       - PROXIED=false

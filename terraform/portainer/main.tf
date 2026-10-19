@@ -44,7 +44,8 @@ resource "portainer_stack" "stacks" {
   active          = each.value.active
 
   # The Git-backed stacks reference their Docker secrets at deploy time, so the
-  # secret must exist before Portainer starts the services.
+  # secret must exist before Portainer starts the services. During rotation,
+  # create the new versioned secret before updating the stack to reference it.
   depends_on = [portainer_docker_secret.cloudflare_ddns]
 
   lifecycle {
@@ -54,7 +55,12 @@ resource "portainer_stack" "stacks" {
 
 resource "portainer_docker_secret" "cloudflare_ddns" {
   endpoint_id = portainer_environment.docker.id
-  name        = "cloudflare_api_token"
+
+  # Docker secrets are immutable and cannot be deleted while a Swarm service
+  # still references them, so rotation creates a new versioned secret and the
+  # stack is repointed at it. The previous secret stays in place until it is
+  # confirmed detached.
+  name = "cloudflare_api_token_v${var.cloudflare_api_token_version}"
 
   # The write-only argument keeps the token out of Terraform state. 1Password
   # injects it through the ephemeral variable when Terraform runs under
@@ -64,6 +70,10 @@ resource "portainer_docker_secret" "cloudflare_ddns" {
 
   labels = {
     managed-by = "terraform"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 

@@ -31,3 +31,4 @@ networks:
 secrets:
   cloudflare_api_token:
     external: true
+    name: cloudflare_api_token_v2

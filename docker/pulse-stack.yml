@@ -26,7 +26,8 @@ services:
         replicas: 1
         resources:
           limits:
-            memory: 768M
+            # Pulse was OOMKilled repeatedly at 768M (usage peaked ~764M).
+            memory: 1G
           reservations:
             memory: 128M
         restart_policy:

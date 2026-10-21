@@ -32,3 +32,6 @@ unattend.pkrtpl
 # Agents
 AGENTS.md
 CLAUDE.md
+
+# IDE
+.vscode
